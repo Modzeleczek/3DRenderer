@@ -11,7 +11,10 @@ struct Vec3f
     float& operator[](const size_t i);
     const float& operator[](const size_t i) const;
     float norm() const;
-    Vec3f& normalize(float l = 1.f);
+    Vec3f& normalize(float coefficient = 1.f);
+    void rotateX(float angle);
+    void rotateY(float angle);
+    void rotateZ(float angle);
 };
 
 float operator*(const Vec3f &lhs, const Vec3f &rhs);

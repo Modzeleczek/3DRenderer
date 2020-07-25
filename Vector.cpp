@@ -18,10 +18,28 @@ float Vec3f::norm() const
 {
     return std::sqrt(x*x + y*y + z*z);
 }
-Vec3f& Vec3f::normalize(float l)
+Vec3f& Vec3f::normalize(float coefficient)
 {
-    *this = (*this) * (l / norm());
+    *this = (*this) * (coefficient / norm());
     return *this;
+}
+void Vec3f::rotateX(float angle)
+{
+    const float Y = y, Z = z, sinA = sin(angle), cosA = cos(angle);
+    y = Y * cosA - Z * sinA;
+    z = Y * sinA + Z * cosA;
+}
+void Vec3f::rotateY(float angle)
+{
+    const float X = x, Z = z, sinA = sin(angle), cosA = cos(angle);
+    x = X * cosA + Z * sinA;
+    z = -X * sinA + Z * cosA;
+}
+void Vec3f::rotateZ(float angle)
+{
+    const float X = x, Y = y, sinA = sin(angle), cosA = cos(angle);
+    x = X * cosA - Y * sinA;
+    y = X * sinA + Y * cosA;   
 }
 
 float operator*(const Vec3f &lhs, const Vec3f &rhs)

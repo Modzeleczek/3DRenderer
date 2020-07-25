@@ -29,7 +29,7 @@ int main()
     const float fov = M_PI / 3.f;
     uint8_t *gifBuffer = new uint8_t[width * height * 4], *p;
     GifWriter g;
-    const int delay = 3;
+    const int delay = 5;
 	GifBegin(&g, "output.gif", width, height, delay);
 
     const int noOfCircles = 3;
@@ -42,7 +42,10 @@ int main()
     Vec3f hit, N, color, orig(0, 0, 0), dir(0, 0, -height / (2.f * tan(fov / 2.f)));
     int y, x, i;
 
-    const float velocity = 0.1f;
+    const float velocity = 0.1f, angularVelocity = M_PI / 100.f;
+
+    float shapes_dist, checkerboard_dist, d;
+
     while(circles[0]->Center.x < 5.f)
     {
         p = gifBuffer;
@@ -53,10 +56,9 @@ int main()
                 dir.x =  (x + 0.5) -  width / 2.f;
                 dir.y = -(y + 0.5) + height / 2.f;
                 
-                float shapes_dist = std::numeric_limits<float>::max();
+                shapes_dist = std::numeric_limits<float>::max();
                 for (i = 0; i < noOfCircles; ++i)
                 {
-                    float d;
                     if (circles[i]->ray_intersect(orig, dir, d) && d < shapes_dist)
                     {
                         shapes_dist = d;
@@ -69,10 +71,10 @@ int main()
                     }
                 }
 
-                float checkerboard_dist = std::numeric_limits<float>::max();
+                checkerboard_dist = std::numeric_limits<float>::max();
                 if (fabs(dir.y) > 1e-3)
                 {
-                    float d = -(orig.y + 4)/dir.y; // the checkerboard plane has equation y = -4
+                    d = -(orig.y + 4) / dir.y; // the checkerboard plane has equation y = -4
                     Vec3f pt = orig + dir * d;
                     if (d > 0 && fabs(pt.x) < 10 && pt.z < -10 && pt.z > -30 && d < shapes_dist)
                     {
@@ -82,8 +84,10 @@ int main()
                         color = (int(.5 * hit.x + 1000) + int(.5 * hit.z)) & 1 ? Vec3f(.3, .3, .3) : Vec3f(.3, .2, .1);
                     }
                 }
-                if(std::min(shapes_dist, checkerboard_dist) < 1000)
+                d = std::min(shapes_dist, checkerboard_dist);
+                if(d < 1000)
                 {
+                    //TODO: im dalej jest punkt zderzenia promienia z obiektem, tym ciemniejszy ma być piksel
                     *(p++) = 256 * color.x;
                     *(p++) = 256 * color.y;
                     *(p++) = 256 * color.z;
@@ -99,9 +103,10 @@ int main()
             }
         }
         GifWriteFrame(&g, gifBuffer, width, height, delay);
+        circles[0]->Normal.rotateZ(angularVelocity);
         circles[0]->Center.x += velocity;
         //orig.y += velocity;
-        orig.z -= velocity*0.5f;
+        //orig.z -= velocity*0.5f;
     }
     for(i = 0; i < noOfCircles; ++i)
         delete circles[i];
