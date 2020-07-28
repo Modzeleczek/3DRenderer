@@ -5,30 +5,11 @@
 #include <limits>
 #include "gif.h"
 
-struct Circle
-{
-    float Radius;
-    Vec3f Center, Normal, Color;
-
-    Circle(const Vec3f &c, const float radius, const Vec3f direction, const Vec3f color)
-        : Radius(radius), Center(c), Normal(direction), Color(color) {}
-
-    bool ray_intersect(const Vec3f &orig, const Vec3f &dir, float &d) const
-    {
-        d = ( Normal*(Center - orig) ) / (Normal*dir);
-        Vec3f hit(orig + d*dir);
-        if( (hit - Center).norm() <= Radius )
-            return true;
-        return false;
-    }
-};
-
 struct Shape
 {
     Vec3f Center, Color;
     Shape(const Vec3f &center, const Vec3f &color) : Center(center), Color(color) {}
     virtual bool ray_intersect(const Vec3f &orig, const Vec3f &dir, float &d) const = 0;
-    //virtual Vec3f getNormal(const Vec3f &hit) const = 0;
 };
 
 struct Sphere : public Shape
@@ -45,7 +26,7 @@ struct Sphere : public Shape
         float d2 = L*L - tca*tca;
         if (d2 > Radius*Radius) return false;
         float thc = sqrtf(Radius*Radius - d2);
-        d       = tca - thc;
+        d = tca - thc;
         float t1 = tca + thc;
         if (d < 0) d = t1;
         if (d < 0) return false;
@@ -58,14 +39,51 @@ struct Sphere : public Shape
     }*/
 };
 
-struct Rectangle : public Shape//nie działa dobrze
+struct PlainShape : Shape
+{
+    Vec3f Normal;
+    PlainShape(const Vec3f &center, const Vec3f &normal, const Vec3f &color)
+        : Shape(center, color), Normal(normal) {}
+    //virtual Vec3f getNormal(const Vec3f &hit) const = 0;
+};
+
+struct Circle : PlainShape
+{
+    float Radius;
+
+    Circle(const Vec3f &center, const float radius, const Vec3f &direction,
+    const Vec3f &color)
+        : PlainShape(center, direction, color), Radius(radius) {}
+
+    bool ray_intersect(const Vec3f &orig, const Vec3f &dir, float &d) const
+    {
+        d = ( Normal*(Center - orig) ) / (Normal*dir);
+        Vec3f hit(orig + d*dir);
+        if( (hit - Center).norm() <= Radius )
+            return true;
+        return false;
+    }
+};
+
+struct Plane : public PlainShape
+{
+    Plane(const Vec3f &center, const Vec3f &direction, const Vec3f &color)
+        : PlainShape(center, direction, color) {}
+
+    bool ray_intersect(const Vec3f &orig, const Vec3f &dir, float &d) const
+    {
+        d = ( Normal*(Center - orig) ) / (Normal*dir);
+        return d > 0;
+    }
+};
+
+struct Rectangle : public PlainShape//nie działa dobrze
 {
     float Width, Height;
-    Vec3f Normal;
 
     Rectangle(const Vec3f &center, const float width, const float height,
         const Vec3f &direction, const Vec3f &color)
-        : Shape(center, color), Width(width), Height(height), Normal(direction) {}
+        : PlainShape(center, direction, color), Width(width), Height(height) {}
 
     bool ray_intersect(const Vec3f &orig, const Vec3f &dir, float &d) const
     {
@@ -93,15 +111,18 @@ int main()
     const int delay = 5;
 	GifBegin(&g, "output.gif", width, height, delay);
 
-    const int noOfCircles = 3;
-    Circle *circles[3];
+    const int noOfShapes = 3;
+    PlainShape *shapes[noOfShapes];
 
-    circles[0] = new Circle(Vec3f(-5.0, 5, -12), 2, Vec3f(0, 1, 0).normalize(), Vec3f(1, 1, 1));
-    circles[1] = new Circle(Vec3f(7, 5, -18), 0.5, Vec3f(1, 2, 0).normalize(), Vec3f(0, 0, 0));
-    circles[2] = new Circle(Vec3f(-2, -3, -15), 1, Vec3f(2, 1, 0).normalize(), Vec3f(0.4, 0.4, 0.3));
-    /*circles[0] = new Rectangle(Vec3f(-5.0, 5, -12), 2, 1.5, Vec3f(0, 1, 0).normalize(), Vec3f(1, 1, 1));
-    circles[1] = new Rectangle(Vec3f(7, 5, -18), 0.5, 0.5, Vec3f(1, 2, 0).normalize(), Vec3f(0, 0, 0));
-    circles[2] = new Rectangle(Vec3f(-2, -3, -15), 1, 0.75, Vec3f(2, 1, 0).normalize(), Vec3f(0.4, 0.4, 0.3));*/
+    /*shapes[0] = new Circle(Vec3f(-5.0, 5, -12), 2, Vec3f(0, 1, 0).normalize(), Vec3f(1, 1, 1));
+    shapes[1] = new Circle(Vec3f(7, 5, -18), 0.5, Vec3f(1, 2, 0).normalize(), Vec3f(0, 0, 0));
+    shapes[2] = new Circle(Vec3f(-2, -3, -15), 1, Vec3f(2, 1, 0).normalize(), Vec3f(0.4, 0.4, 0.3));*/
+    shapes[0] = new Circle(Vec3f(-2, 3, -12), 2, Vec3f(1, 1, 0).normalize(), Vec3f(0.5, 0, 0));
+    shapes[1] = new Plane(Vec3f(-5, -3, -12), Vec3f(1, 0, 0).normalize(), Vec3f(0, 0.5, 0));
+    shapes[2] = new Plane(Vec3f(5, -3, -12), Vec3f(1, 0, 0).normalize(), Vec3f(0.4, 0.4, 0.3));
+    /*shapes[0] = new Rectangle(Vec3f(-5.0, 5, -12), 2, 1.5, Vec3f(0, 1, 0).normalize(), Vec3f(1, 1, 1));
+    shapes[1] = new Rectangle(Vec3f(7, 5, -18), 0.5, 0.5, Vec3f(1, 2, 0).normalize(), Vec3f(0, 0, 0));
+    shapes[2] = new Rectangle(Vec3f(-2, -3, -15), 1, 0.75, Vec3f(2, 1, 0).normalize(), Vec3f(0.4, 0.4, 0.3));*/
 
     Vec3f hit, N, color, orig(0, 0, 0), dir(0, 0, -height / (2.f * tan(fov / 2.f)));
     int y, x, i;
@@ -109,8 +130,8 @@ int main()
     const float velocity = 0.5f, angularVelocity = M_PI / 100.f;
 
     float shapes_dist, checkerboard_dist, d;
-
-    while(circles[0]->Center.x < 5.f)
+    uint32_t frameCounter = 0;
+    while(frameCounter < 50)
     {
         p = gifBuffer;
         for(y = 0; y < height; ++y)
@@ -121,13 +142,13 @@ int main()
                 dir.y = -(y + 0.5) + height / 2.f;
                 
                 shapes_dist = std::numeric_limits<float>::max();
-                for (i = 0; i < noOfCircles; ++i)
+                for (i = 0; i < noOfShapes; ++i)
                 {
-                    if (circles[i]->ray_intersect(orig, dir, d) && d < shapes_dist)
+                    if (shapes[i]->ray_intersect(orig, dir, d) && d < shapes_dist)
                     {
                         shapes_dist = d;
-                        hit = orig + dir * d;
-                        color = circles[i]->Color;
+                        //hit = orig + dir * d;
+                        color = shapes[i]->Color;
                     }
                 }
 
@@ -135,11 +156,11 @@ int main()
                 if (fabs(dir.y) > 1e-3)
                 {
                     d = -(orig.y + 4) / dir.y; // the checkerboard plane has equation y = -4
-                    Vec3f pt = orig + dir * d;
-                    if (d > 0 /*&& fabs(pt.x) < 10 && pt.z < -5 && pt.z > -30*/ && d < shapes_dist)
+                    hit = orig + dir * d;
+                    if (d > 0 /*&& fabs(hit.x) < 10 && hit.z < -5 && hit.z > -30*/ 
+                    && d < shapes_dist)
                     {
                         checkerboard_dist = d;
-                        hit = pt;
                         N = Vec3f(0, 1, 0);
                         color = (int(.5 * hit.x + 1000) + int(.5 * hit.z)) & 1 ? Vec3f(.3, .3, .3) : Vec3f(.3, .2, .1);
                     }
@@ -156,18 +177,20 @@ int main()
                 {
                     //background color
                     *(p++) = 255 * 0.f;//r
-                    *(p++) = 255 * 0.3f;//g
-                    *(p++) = 255 * 0.2f;//b
+                    *(p++) = 255 * 0.f;//g
+                    *(p++) = 255 * 0.f;//b
                 }
                 ++p;//alpha is ignored
             }
         }
         GifWriteFrame(&g, gifBuffer, width, height, delay);
-        circles[0]->Normal.rotateZ(angularVelocity);
-        circles[0]->Center.x += velocity;
+        //shapes[0]->Normal.rotateZ(angularVelocity);
+        shapes[0]->Center.x += velocity;
+        ++frameCounter;
     }
-    for(i = 0; i < noOfCircles; ++i)
-        delete circles[i];
+    for(i = 0; i < noOfShapes; ++i)
+        if(shapes[i] != NULL)
+            delete shapes[i];
 
     GifEnd(&g);
     delete[] gifBuffer;
