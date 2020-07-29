@@ -58,10 +58,7 @@ struct Circle : PlainShape
     bool ray_intersect(const Vec3f &orig, const Vec3f &dir, float &d) const
     {
         d = ( Normal*(Center - orig) ) / (Normal*dir);
-        Vec3f hit(orig + d*dir);
-        if( (hit - Center).norm() <= Radius )
-            return true;
-        return false;
+        return (orig + d*dir - Center).norm() <= Radius;
     }
 };
 
@@ -114,15 +111,9 @@ int main()
     const int noOfShapes = 3;
     PlainShape *shapes[noOfShapes];
 
-    /*shapes[0] = new Circle(Vec3f(-5.0, 5, -12), 2, Vec3f(0, 1, 0).normalize(), Vec3f(1, 1, 1));
-    shapes[1] = new Circle(Vec3f(7, 5, -18), 0.5, Vec3f(1, 2, 0).normalize(), Vec3f(0, 0, 0));
-    shapes[2] = new Circle(Vec3f(-2, -3, -15), 1, Vec3f(2, 1, 0).normalize(), Vec3f(0.4, 0.4, 0.3));*/
     shapes[0] = new Circle(Vec3f(-2, 3, -12), 2, Vec3f(1, 1, 0).normalize(), Vec3f(0.5, 0, 0));
     shapes[1] = new Plane(Vec3f(-5, -3, -12), Vec3f(1, 0, 0).normalize(), Vec3f(0, 0.5, 0));
-    shapes[2] = new Plane(Vec3f(5, -3, -12), Vec3f(1, 0, 0).normalize(), Vec3f(0.4, 0.4, 0.3));
-    /*shapes[0] = new Rectangle(Vec3f(-5.0, 5, -12), 2, 1.5, Vec3f(0, 1, 0).normalize(), Vec3f(1, 1, 1));
-    shapes[1] = new Rectangle(Vec3f(7, 5, -18), 0.5, 0.5, Vec3f(1, 2, 0).normalize(), Vec3f(0, 0, 0));
-    shapes[2] = new Rectangle(Vec3f(-2, -3, -15), 1, 0.75, Vec3f(2, 1, 0).normalize(), Vec3f(0.4, 0.4, 0.3));*/
+    shapes[2] = new Plane(Vec3f(5, -3, -12), Vec3f(-1, 0, 1).normalize(), Vec3f(0.4, 0.4, 0.3));
 
     Vec3f hit, N, color, orig(0, 0, 0), dir(0, 0, -height / (2.f * tan(fov / 2.f)));
     int y, x, i;
@@ -138,8 +129,8 @@ int main()
         {
             for(x = 0; x < width; ++x)
             {
-                dir.x =  (x + 0.5) -  width / 2.f;
-                dir.y = -(y + 0.5) + height / 2.f;
+                dir.x =  x -  width / 2.f;
+                dir.y = -y + height / 2.f;
                 
                 shapes_dist = std::numeric_limits<float>::max();
                 for (i = 0; i < noOfShapes; ++i)
@@ -147,7 +138,6 @@ int main()
                     if (shapes[i]->ray_intersect(orig, dir, d) && d < shapes_dist)
                     {
                         shapes_dist = d;
-                        //hit = orig + dir * d;
                         color = shapes[i]->Color;
                     }
                 }
