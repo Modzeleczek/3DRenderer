@@ -103,7 +103,7 @@ int main()
 {
     const int width = 800, height = 600;
     const float fov = M_PI / 2.f;
-    uint8_t *gifBuffer = new uint8_t[width * height * 4], *p;
+    uint8_t *const gifBuffer = new uint8_t[width * height * 4], *p;
     GifWriter g;
     const int delay = 5;
 	GifBegin(&g, "output.gif", width, height, delay);
@@ -114,15 +114,16 @@ int main()
     shapes[0] = new Circle(Vec3f(-2, 3, -12), 2, Vec3f(1, 1, 0).normalize(), Vec3f(0.5, 0, 0));
     shapes[1] = new Plane(Vec3f(-5, -3, -12), Vec3f(1, 0, 0).normalize(), Vec3f(0, 0.5, 0));
     shapes[2] = new Plane(Vec3f(5, -3, -12), Vec3f(-1, 0, 1).normalize(), Vec3f(0.4, 0.4, 0.3));
+    //shapes[3] = new Plane(Vec3f(0, -4, 0), Vec3f(0, 1, 0).normalize(), Vec3f(0, 0, 1));
 
     Vec3f hit, N, color, orig(0, 0, 0), dir(0, 0, -height / (2.f * tan(fov / 2.f)));
     int y, x, i;
 
     const float velocity = 0.5f, angularVelocity = M_PI / 100.f;
 
-    float shapes_dist, checkerboard_dist, d;
+    float closestShapeDistance, distance;
     uint32_t frameCounter = 0;
-    while(frameCounter < 50)
+    while(frameCounter < 25)
     {
         p = gifBuffer;
         for(y = 0; y < height; ++y)
@@ -132,31 +133,17 @@ int main()
                 dir.x =  x -  width / 2.f;
                 dir.y = -y + height / 2.f;
                 
-                shapes_dist = std::numeric_limits<float>::max();
+                closestShapeDistance = std::numeric_limits<float>::max();
                 for (i = 0; i < noOfShapes; ++i)
                 {
-                    if (shapes[i]->ray_intersect(orig, dir, d) && d < shapes_dist)
+                    if (shapes[i]->ray_intersect(orig, dir, distance) &&
+                        distance < closestShapeDistance)
                     {
-                        shapes_dist = d;
+                        closestShapeDistance = distance;
                         color = shapes[i]->Color;
                     }
                 }
-
-                checkerboard_dist = std::numeric_limits<float>::max();
-                if (fabs(dir.y) > 1e-3)
-                {
-                    d = -(orig.y + 4) / dir.y; // the checkerboard plane has equation y = -4
-                    hit = orig + dir * d;
-                    if (d > 0 /*&& fabs(hit.x) < 10 && hit.z < -5 && hit.z > -30*/ 
-                    && d < shapes_dist)
-                    {
-                        checkerboard_dist = d;
-                        N = Vec3f(0, 1, 0);
-                        color = (int(.5 * hit.x + 1000) + int(.5 * hit.z)) & 1 ? Vec3f(.3, .3, .3) : Vec3f(.3, .2, .1);
-                    }
-                }
-                d = std::min(shapes_dist, checkerboard_dist);
-                if(d < 1000)
+                if(closestShapeDistance < 1000)
                 {
                     //TODO: im dalej jest punkt zderzenia promienia z obiektem, tym ciemniejszy ma być piksel
                     *(p++) = 255 * color.x;
@@ -179,8 +166,7 @@ int main()
         ++frameCounter;
     }
     for(i = 0; i < noOfShapes; ++i)
-        if(shapes[i] != NULL)
-            delete shapes[i];
+        delete shapes[i];
 
     GifEnd(&g);
     delete[] gifBuffer;
