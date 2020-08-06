@@ -108,15 +108,15 @@ int main()
     const int delay = 5;
 	GifBegin(&g, "output.gif", width, height, delay);
 
-    const int noOfShapes = 3;
+    const int noOfShapes = 4;
     PlainShape *shapes[noOfShapes];
 
     shapes[0] = new Circle(Vec3f(-2, 3, -12), 2, Vec3f(1, 1, 0).normalize(), Vec3f(0.5, 0, 0));
     shapes[1] = new Plane(Vec3f(-5, -3, -12), Vec3f(1, 0, 0).normalize(), Vec3f(0, 0.5, 0));
     shapes[2] = new Plane(Vec3f(5, -3, -12), Vec3f(-1, 0, 1).normalize(), Vec3f(0.4, 0.4, 0.3));
-    //shapes[3] = new Plane(Vec3f(0, -4, 0), Vec3f(0, 1, 0).normalize(), Vec3f(0, 0, 1));
+    shapes[3] = new Plane(Vec3f(0, -4, 0), Vec3f(0, 1, 0).normalize(), Vec3f(0, 0, 1));
 
-    Vec3f hit, N, color, orig(0, 0, 0), dir(0, 0, -height / (2.f * tan(fov / 2.f)));
+    Vec3f color, cameraPosition(0, 0, 0), rayDirection(0, 0, -height / (2.f * tan(fov / 2.f)));
     int y, x, i;
 
     const float velocity = 0.5f, angularVelocity = M_PI / 100.f;
@@ -130,13 +130,13 @@ int main()
         {
             for(x = 0; x < width; ++x)
             {
-                dir.x =  x -  width / 2.f;
-                dir.y = -y + height / 2.f;
+                rayDirection.x =  x -  width / 2.f;
+                rayDirection.y = -y + height / 2.f;
                 
                 closestShapeDistance = std::numeric_limits<float>::max();
                 for (i = 0; i < noOfShapes; ++i)
                 {
-                    if (shapes[i]->ray_intersect(orig, dir, distance) &&
+                    if (shapes[i]->ray_intersect(cameraPosition, rayDirection, distance) &&
                         distance < closestShapeDistance)
                     {
                         closestShapeDistance = distance;
