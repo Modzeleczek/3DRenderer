@@ -9,7 +9,7 @@ struct Shape
 {
     Vec3f Center, Color;
     Shape(const Vec3f &center, const Vec3f &color) : Center(center), Color(color) {}
-    virtual bool ray_intersect(const Vec3f &orig, const Vec3f &dir, float &d) const = 0;
+    virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const = 0;
 };
 
 struct Sphere : public Shape
@@ -19,7 +19,7 @@ struct Sphere : public Shape
     Sphere(const Vec3f &center, const float radius, const Vec3f &color)
         : Shape(center, color), Radius(radius) {}
 
-    bool ray_intersect(const Vec3f &orig, const Vec3f &dir, float &d) const
+    bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
     {
         Vec3f L = Center - orig;
         float tca = L*dir;
@@ -32,11 +32,6 @@ struct Sphere : public Shape
         if (d < 0) return false;
         return true;
     }
-
-    /*Vec3f getNormal(const Vec3f &hit) const
-    {
-        return (hit - center).normalize();
-    }*/
 };
 
 struct PlainShape : Shape
@@ -55,7 +50,7 @@ struct Circle : PlainShape
     const Vec3f &color)
         : PlainShape(center, direction, color), Radius(radius) {}
 
-    bool ray_intersect(const Vec3f &orig, const Vec3f &dir, float &d) const
+    virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
     {
         d = ( Normal*(Center - orig) ) / (Normal*dir);
         return (orig + d*dir - Center).norm() <= Radius;
@@ -67,7 +62,7 @@ struct Plane : public PlainShape
     Plane(const Vec3f &center, const Vec3f &direction, const Vec3f &color)
         : PlainShape(center, direction, color) {}
 
-    bool ray_intersect(const Vec3f &orig, const Vec3f &dir, float &d) const
+    virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
     {
         d = ( Normal*(Center - orig) ) / (Normal*dir);
         return d > 0;
@@ -82,7 +77,7 @@ struct Rectangle : public PlainShape//nie działa dobrze
         const Vec3f &direction, const Vec3f &color)
         : PlainShape(center, direction, color), Width(width), Height(height) {}
 
-    bool ray_intersect(const Vec3f &orig, const Vec3f &dir, float &d) const
+    virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
     {
         d = ( Normal*(Center - orig) ) / (Normal*dir);
         /*Vec3f hit(orig + d*dir);
@@ -92,21 +87,13 @@ struct Rectangle : public PlainShape//nie działa dobrze
         return (sqrtf(powf(orig.x + d*dir.x - Center.x, 2) + dz2) <= Width / 2.f &&//dxz
                 sqrtf(powf(orig.y + d*dir.y - Center.y, 2) + dz2) <= Height / 2.f);//dyz
     }
-
-    /*Vec3f getNormal(const Vec3f &hit) const
-    {
-        return Direction;
-    }*/
 };
 
 int main()
 {
     const int width = 800, height = 600;
     const float fov = M_PI / 2.f;
-    uint8_t *const gifBuffer = new uint8_t[width * height * 4], *p;
-    GifWriter g;
-    const int delay = 5;
-	GifBegin(&g, "output.gif", width, height, delay);
+    Vec3f *const bmpBuffer = new Vec3f[width * height], *p = bmpBuffer;
 
     const int noOfShapes = 4;
     PlainShape *shapes[noOfShapes];
@@ -119,57 +106,45 @@ int main()
     Vec3f color, cameraPosition(0, 0, 0), rayDirection(0, 0, -height / (2.f * tan(fov / 2.f)));
     int y, x, i;
 
-    const float velocity = 0.5f, angularVelocity = M_PI / 100.f;
-
     float closestShapeDistance, distance;
-    uint32_t frameCounter = 0;
-    while(frameCounter < 25)
+    for(y = 0; y < height; ++y)
     {
-        p = gifBuffer;
-        for(y = 0; y < height; ++y)
+        for(x = 0; x < width; ++x)
         {
-            for(x = 0; x < width; ++x)
+            rayDirection.x =  x -  width / 2.f;
+            rayDirection.y = -y + height / 2.f;
+            
+            closestShapeDistance = std::numeric_limits<float>::max();
+            for(i = 0; i < noOfShapes; ++i)
             {
-                rayDirection.x =  x -  width / 2.f;
-                rayDirection.y = -y + height / 2.f;
-                
-                closestShapeDistance = std::numeric_limits<float>::max();
-                for (i = 0; i < noOfShapes; ++i)
+                if(shapes[i]->RayIntersect(cameraPosition, rayDirection, distance) &&
+                   distance < closestShapeDistance)
                 {
-                    if (shapes[i]->ray_intersect(cameraPosition, rayDirection, distance) &&
-                        distance < closestShapeDistance)
-                    {
-                        closestShapeDistance = distance;
-                        color = shapes[i]->Color;
-                    }
+                    closestShapeDistance = distance;
+                    color = shapes[i]->Color;
                 }
-                if(closestShapeDistance < 1000)
-                {
-                    //TODO: im dalej jest punkt zderzenia promienia z obiektem, tym ciemniejszy ma być piksel
-                    *(p++) = 255 * color.x;
-                    *(p++) = 255 * color.y;
-                    *(p++) = 255 * color.z;
-                }
-                else
-                {
-                    //background color
-                    *(p++) = 255 * 0.f;//r
-                    *(p++) = 255 * 0.f;//g
-                    *(p++) = 255 * 0.f;//b
-                }
-                ++p;//alpha is ignored
             }
+            if(closestShapeDistance < 1000)
+            {
+                p->x = 255 * color.x;
+                p->y = 255 * color.y;
+                p->z = 255 * color.z;
+            }
+            else
+            {
+                //background color
+                p->x = 255 * 0.f;//r
+                p->y = 255 * 0.f;//g
+                p->z = 255 * 0.f;//b
+            }
+            ++p;
         }
-        GifWriteFrame(&g, gifBuffer, width, height, delay);
-        //shapes[0]->Normal.rotateZ(angularVelocity);
-        shapes[0]->Center.x += velocity;
-        ++frameCounter;
     }
     for(i = 0; i < noOfShapes; ++i)
         delete shapes[i];
 
-    GifEnd(&g);
-    delete[] gifBuffer;
+    BMPSaver("output", width, height, bmpBuffer).Save();
+    delete[] bmpBuffer;
 
     return 0;
 }
