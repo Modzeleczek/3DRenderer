@@ -89,59 +89,56 @@ struct Rectangle : public PlainShape//nie działa dobrze
     }
 };
 
+void CastRay(const Vec3f &origin, const Vec3f &direction, Shape **shapes,
+const u_int8_t numberOfShapes, Vec3f *p)
+{
+    uint8_t i, closestIndex;
+    float closestShapeDistance, distance;
+    closestShapeDistance = std::numeric_limits<float>::max();
+    for(i = 0; i < numberOfShapes; ++i)
+    {
+        if(shapes[i]->RayIntersect(origin, direction, distance) &&
+           distance < closestShapeDistance)
+        {
+            closestShapeDistance = distance;
+            closestIndex = i;
+        }
+    }
+    if(closestShapeDistance < 1000)
+        *p = 255 * shapes[closestIndex]->Color;
+    else
+        //background color
+        *p = Vec3f(0.f, 0.f, 0.f);
+}
+
 int main()
 {
     const int width = 800, height = 600;
     const float fov = M_PI / 2.f;
     Vec3f *const bmpBuffer = new Vec3f[width * height], *p = bmpBuffer;
 
-    const int noOfShapes = 4;
-    PlainShape *shapes[noOfShapes];
+    const uint8_t noOfShapes = 4;
+    Shape **shapes = new Shape*[noOfShapes];
 
     shapes[0] = new Circle(Vec3f(-2, 3, -12), 2, Vec3f(1, 1, 0).normalize(), Vec3f(0.5, 0, 0));
     shapes[1] = new Plane(Vec3f(-5, -3, -12), Vec3f(1, 0, 0).normalize(), Vec3f(0, 0.5, 0));
     shapes[2] = new Plane(Vec3f(5, -3, -12), Vec3f(-1, 0, 1).normalize(), Vec3f(0.4, 0.4, 0.3));
     shapes[3] = new Plane(Vec3f(0, -4, 0), Vec3f(0, 1, 0).normalize(), Vec3f(0, 0, 1));
 
-    Vec3f color, cameraPosition(0, 0, 0), rayDirection(0, 0, -height / (2.f * tan(fov / 2.f)));
-    int y, x, i;
-
-    float closestShapeDistance, distance;
+    Vec3f cameraPosition(0, 0, 0), rayDirection(0, 0, -height / (2.f * tan(fov / 2.f)));
+    int y, x;
     for(y = 0; y < height; ++y)
     {
         for(x = 0; x < width; ++x)
         {
             rayDirection.x =  x -  width / 2.f;
             rayDirection.y = -y + height / 2.f;
-            
-            closestShapeDistance = std::numeric_limits<float>::max();
-            for(i = 0; i < noOfShapes; ++i)
-            {
-                if(shapes[i]->RayIntersect(cameraPosition, rayDirection, distance) &&
-                   distance < closestShapeDistance)
-                {
-                    closestShapeDistance = distance;
-                    color = shapes[i]->Color;
-                }
-            }
-            if(closestShapeDistance < 1000)
-            {
-                p->x = 255 * color.x;
-                p->y = 255 * color.y;
-                p->z = 255 * color.z;
-            }
-            else
-            {
-                //background color
-                p->x = 255 * 0.f;//r
-                p->y = 255 * 0.f;//g
-                p->z = 255 * 0.f;//b
-            }
-            ++p;
+            CastRay(cameraPosition, rayDirection, shapes, noOfShapes, p++);
         }
     }
-    for(i = 0; i < noOfShapes; ++i)
+    for(uint8_t i = 0; i < noOfShapes; ++i)
         delete shapes[i];
+    delete[] shapes;
 
     BMPSaver("output", width, height, bmpBuffer).Save();
     delete[] bmpBuffer;
