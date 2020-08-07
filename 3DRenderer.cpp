@@ -19,7 +19,7 @@ struct Sphere : public Shape
     Sphere(const Vec3f &center, const float radius, const Vec3f &color)
         : Shape(center, color), Radius(radius) {}
 
-    bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
+    virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
     {
         Vec3f L = Center - orig;
         float tca = L*dir;
@@ -27,10 +27,10 @@ struct Sphere : public Shape
         if (d2 > Radius*Radius) return false;
         float thc = sqrtf(Radius*Radius - d2);
         d = tca - thc;
-        float t1 = tca + thc;
-        if (d < 0) d = t1;
-        if (d < 0) return false;
-        return true;
+        if(d >= 0) return true;
+        d = tca + thc;
+        if(d >= 0) return true;
+        return false;
     }
 };
 
@@ -69,7 +69,7 @@ struct Plane : public PlainShape
     }
 };
 
-struct Rectangle : public PlainShape//nie działa dobrze
+struct Rectangle : public PlainShape//nie działa
 {
     float Width, Height;
 
@@ -89,12 +89,32 @@ struct Rectangle : public PlainShape//nie działa dobrze
     }
 };
 
+struct Ellipse : public PlainShape//nie działa
+{
+    Vec3f Center2;
+    float ConstantSum;
+
+    Ellipse(const Vec3f &center1, const Vec3f &center2, const float constantSum,
+    const Vec3f &direction, const Vec3f &color)
+        : PlainShape(center1, direction, color), Center2(center2), ConstantSum(constantSum) {}
+
+    virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
+    {
+        d = ( Normal*(Center - orig) ) / (Normal*dir);
+        if(d <= 0)
+            return false;
+        Vec3f p = orig + d*dir;
+        float d1 = (p - Center).norm(),
+              d2 = (p - Center2).norm();
+        return (d1 + d2 <= ConstantSum);
+    }
+};
+
 void CastRay(const Vec3f &origin, const Vec3f &direction, Shape **shapes,
 const u_int8_t numberOfShapes, Vec3f *p)
 {
-    uint8_t i, closestIndex;
-    float closestShapeDistance, distance;
-    closestShapeDistance = std::numeric_limits<float>::max();
+    uint8_t i, closestIndex = 0;
+    float closestShapeDistance = std::numeric_limits<float>::max(), distance;
     for(i = 0; i < numberOfShapes; ++i)
     {
         if(shapes[i]->RayIntersect(origin, direction, distance) &&
