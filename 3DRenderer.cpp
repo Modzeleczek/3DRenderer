@@ -3,7 +3,6 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
-#include "gif.h"
 
 struct Shape
 {
@@ -26,10 +25,22 @@ struct Sphere : public Shape
         float d2 = L*L - tca*tca;
         if (d2 > Radius*Radius) return false;
         float thc = sqrtf(Radius*Radius - d2);
-        d = tca - thc;
-        if(d >= 0) return true;
+        d = tca - thc;// thc jest zawsze nieujemne, więc tca - thc jest zawsze mniejsze od tca + thc
+        if(d > 0) return true;
         d = tca + thc;
-        if(d >= 0) return true;
+        return d > 0;
+    }
+};
+
+struct Cube : Shape
+{
+    float Edge;
+
+    Cube(const Vec3f &center, const float edge, const Vec3f &color)
+        : Shape(center, color), Edge(edge) {}
+    
+    virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
+    {
         return false;
     }
 };
@@ -69,7 +80,7 @@ struct Plane : public PlainShape
     }
 };
 
-struct Rectangle : public PlainShape//nie działa
+struct Rectangle : public PlainShape
 {
     float Width, Height;
 
@@ -79,13 +90,10 @@ struct Rectangle : public PlainShape//nie działa
 
     virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
     {
-        d = ( Normal*(Center - orig) ) / (Normal*dir);
-        /*Vec3f hit(orig + d*dir);
-        float dxz = sqrtf(powf(hit.x - Center.x, 2) + powf(hit.z - Center.z, 2)),
-            dyz = sqrtf(powf(hit.y - Center.y, 2) + powf(hit.z - Center.z, 2));*/
-        float dz2 = powf(orig.z + d*dir.z - Center.z, 2);
-        return (sqrtf(powf(orig.x + d*dir.x - Center.x, 2) + dz2) <= Width / 2.f &&//dxz
-                sqrtf(powf(orig.y + d*dir.y - Center.y, 2) + dz2) <= Height / 2.f);//dyz
+        d = ( Vec3f(0,0,1)*(Center - orig) ) / (Vec3f(0,0,1)*dir);
+        Vec3f p = orig + d*dir;
+        return (p.x >= Center.x - Width && p.x < Center.x + Width &&
+                p.y >= Center.y - Height && p.y < Center.y + Height);
     }
 };
 
@@ -137,23 +145,29 @@ int main()
     const float fov = M_PI / 2.f;
     Vec3f *const bmpBuffer = new Vec3f[width * height], *p = bmpBuffer;
 
-    const uint8_t noOfShapes = 4;
+    const uint8_t noOfShapes = 7;
     Shape **shapes = new Shape*[noOfShapes];
 
-    shapes[0] = new Circle(Vec3f(-2, 3, -12), 2, Vec3f(1, 1, 0).normalize(), Vec3f(0.5, 0, 0));
-    shapes[1] = new Plane(Vec3f(-5, -3, -12), Vec3f(1, 0, 0).normalize(), Vec3f(0, 0.5, 0));
-    shapes[2] = new Plane(Vec3f(5, -3, -12), Vec3f(-1, 0, 1).normalize(), Vec3f(0.4, 0.4, 0.3));
-    shapes[3] = new Plane(Vec3f(0, -4, 0), Vec3f(0, 1, 0).normalize(), Vec3f(0, 0, 1));
+    shapes[0] = new Circle(Vec3f(6,3,-12), 3, Vec3f(1,1,0).normalize(), Vec3f(0.5,0,0));
+    shapes[1] = new Plane(Vec3f(-5,-3,-12), Vec3f(1,0,0).normalize(), Vec3f(0,0.5,0));
+    shapes[2] = new Plane(Vec3f(5,-3,-12), Vec3f(-1,0,1).normalize(), Vec3f(0.4,0.4,0.3));
+    shapes[3] = new Plane(Vec3f(0,-4,0), Vec3f(0,1,0).normalize(), Vec3f(0,0,1));
+    shapes[4] = new Rectangle(Vec3f(6,3,-12), 3, 6, Vec3f(0,0,0), Vec3f(0,1,1));
+    shapes[5] = new Sphere(Vec3f(0,1,-5), 1, Vec3f(1,1,0));
+    shapes[6] = new Ellipse(Vec3f(-2,1,-3), Vec3f(2,1,-3), 5, Vec3f(0,0,1).normalize(), Vec3f(0,0,1));
 
-    Vec3f cameraPosition(0, 0, 0), rayDirection(0, 0, -height / (2.f * tan(fov / 2.f)));
+    const float rayZ = -height / (2.f * tan(fov / 2.f));
+    const Vec3f cameraPosition(0, 0, 0);
+    Vec3f rayDirection;
     int y, x;
     for(y = 0; y < height; ++y)
     {
         for(x = 0; x < width; ++x)
         {
-            rayDirection.x =  x -  width / 2.f;
+            rayDirection.x = x - width / 2.f;
             rayDirection.y = -y + height / 2.f;
-            CastRay(cameraPosition, rayDirection, shapes, noOfShapes, p++);
+            rayDirection.z = rayZ;
+            CastRay(cameraPosition, rayDirection.normalize(), shapes, noOfShapes, p++);
         }
     }
     for(uint8_t i = 0; i < noOfShapes; ++i)
