@@ -25,11 +25,11 @@ void PPMSaver::Save()
     ofs.close();
 }
 
-void BMPSaver::WriteValue(std::ofstream &output, unsigned int value, const unsigned char byteCount)
+void BMPSaver::WriteBytes(unsigned int value, const unsigned char byteCount)
 {
     for(unsigned int i = 0; i < byteCount; ++i)
     {
-        output.put(value % 256);
+        OutputStream.put(value % 256);
         value /= 256;
     }
 }
@@ -38,31 +38,31 @@ BMPSaver::BMPSaver(std::string name, unsigned int width, unsigned int height, Ve
 void BMPSaver::Save()
 {
     const unsigned int extraBytes = ( 4 - ((Width * 3) % 4) ) % 4;
-    std::ofstream ofs(Name + ".bmp", std::ios::binary);
+    OutputStream = std::ofstream(Name + ".bmp", std::ios::binary);
 
     //BMP header
-    WriteValue(ofs, 'B', 1);
-    WriteValue(ofs, 'M', 1);
-    WriteValue(ofs, 54 + (Width * 3 + extraBytes) * Height, 4);
-    WriteValue(ofs, 0, 2);
-    WriteValue(ofs, 0, 2);
-    WriteValue(ofs, 54, 4);
+    WriteBytes('B', 1);
+    WriteBytes('M', 1);
+    WriteBytes(54 + (Width * 3 + extraBytes) * Height, 4);
+    WriteBytes(0, 2);
+    WriteBytes(0, 2);
+    WriteBytes(54, 4);
 
     //DIB header
-    WriteValue(ofs, 40, 4);
-    WriteValue(ofs, Width, 4);
-    WriteValue(ofs, Height, 4);
-    WriteValue(ofs, 1, 2);
-    WriteValue(ofs, 24, 2);
-    WriteValue(ofs, 0, 4);
+    WriteBytes(40, 4);
+    WriteBytes(Width, 4);
+    WriteBytes(Height, 4);
+    WriteBytes(1, 2);
+    WriteBytes(24, 2);
+    WriteBytes(0, 4);
 
-    WriteValue(ofs, (Width * 3 + extraBytes) * Height, 4);
+    WriteBytes((Width * 3 + extraBytes) * Height, 4);
     //WriteValue(output, 0, 4);//też zadziała przy braku kompresji (czyli tak, jak jest standardowo)
 
-    WriteValue(ofs, 0, 4);
-    WriteValue(ofs, 0, 4);
-    WriteValue(ofs, 0, 4);
-    WriteValue(ofs, 0, 4);
+    WriteBytes(0, 4);
+    WriteBytes(0, 4);
+    WriteBytes(0, 4);
+    WriteBytes(0, 4);
 
     //pixel array (bitmap data)
 
@@ -77,12 +77,12 @@ void BMPSaver::Save()
             max = std::max(c[0], std::max(c[1], c[2]));
             if (max > 1) c = c * (1. / max);
             for (j = 2; j >= 0; --j)
-                ofs.put((char)(255 * std::max(0.f, std::min(1.f, c[j]))));
+                OutputStream.put((char)(255 * std::max(0.f, std::min(1.f, c[j]))));
             ++i;
         }
         for(j = 0; j < extraBytes; ++j)
-            ofs.put(0);
+            OutputStream.put(0);
         i = i - 2 * Width;
     }
-    ofs.close();
+    OutputStream.close();
 }

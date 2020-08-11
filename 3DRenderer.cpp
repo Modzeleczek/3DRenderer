@@ -97,24 +97,23 @@ struct Rectangle : public PlainShape
     }
 };
 
-struct Ellipse : public PlainShape//nie działa
+struct Ellipse : public PlainShape
 {
-    Vec3f Center2;
-    float ConstantSum;
+    Vec3f Focus2;//Center == Focus1
+    float FocusDistanceSum;
 
-    Ellipse(const Vec3f &center1, const Vec3f &center2, const float constantSum,
+    //additionalFociDistance - dodatkowa wartość sumy odległości ponad odległość między ogniskami, żeby zapobiec sytuacji, kiedy FocusDistanceSum jest mniejsze niż odległość między ogniskami i elipsa nie istnieje
+    Ellipse(const Vec3f &center1, const Vec3f &center2, const float additionalFociDistance,
     const Vec3f &direction, const Vec3f &color)
-        : PlainShape(center1, direction, color), Center2(center2), ConstantSum(constantSum) {}
+        : PlainShape(center1, direction, color), Focus2(center2),
+        FocusDistanceSum((center1 - center2).norm() + additionalFociDistance) {}
 
     virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
     {
         d = ( Normal*(Center - orig) ) / (Normal*dir);
-        if(d <= 0)
-            return false;
+        if(d <= 0) return false;
         Vec3f p = orig + d*dir;
-        float d1 = (p - Center).norm(),
-              d2 = (p - Center2).norm();
-        return (d1 + d2 <= ConstantSum);
+        return ((p - Center).norm() + (p - Focus2).norm() <= FocusDistanceSum);
     }
 };
 
@@ -139,25 +138,32 @@ const u_int8_t numberOfShapes, Vec3f *p)
         *p = Vec3f(0.f, 0.f, 0.f);
 }
 
+inline Vec3f randomColor()
+{
+    return Vec3f( (rand() & 255) / 255.f, (rand() & 255) / 255.f, (rand() & 255) / 255.f );
+}
+//#define randomColor() {Vec3f( (rand() & 255) / 255.f, (rand() & 255) / 255.f, (rand() & 255) / 255.f )}
+
 int main()
 {
-    const int width = 800, height = 600;
+    const int width = 1280, height = 720;
     const float fov = M_PI / 2.f;
     Vec3f *const bmpBuffer = new Vec3f[width * height], *p = bmpBuffer;
 
     const uint8_t noOfShapes = 7;
     Shape **shapes = new Shape*[noOfShapes];
 
-    shapes[0] = new Circle(Vec3f(6,3,-12), 3, Vec3f(1,1,0).normalize(), Vec3f(0.5,0,0));
-    shapes[1] = new Plane(Vec3f(-5,-3,-12), Vec3f(1,0,0).normalize(), Vec3f(0,0.5,0));
-    shapes[2] = new Plane(Vec3f(5,-3,-12), Vec3f(-1,0,1).normalize(), Vec3f(0.4,0.4,0.3));
-    shapes[3] = new Plane(Vec3f(0,-4,0), Vec3f(0,1,0).normalize(), Vec3f(0,0,1));
-    shapes[4] = new Rectangle(Vec3f(6,3,-12), 3, 6, Vec3f(0,0,0), Vec3f(0,1,1));
-    shapes[5] = new Sphere(Vec3f(0,1,-5), 1, Vec3f(1,1,0));
-    shapes[6] = new Ellipse(Vec3f(-2,1,-3), Vec3f(2,1,-3), 5, Vec3f(0,0,1).normalize(), Vec3f(0,0,1));
+    srand(time(0));
+    shapes[0] = new Circle(Vec3f(6,3,-12), 3, Vec3f(1,1,0).normalize(), randomColor());
+    shapes[1] = new Plane(Vec3f(-5,-3,-12), Vec3f(1,0,0).normalize(), randomColor());
+    shapes[2] = new Plane(Vec3f(5,-3,-12), Vec3f(-1,0,1).normalize(), randomColor());
+    shapes[3] = new Plane(Vec3f(0,-4,0), Vec3f(0,1,0).normalize(), randomColor());
+    shapes[4] = new Rectangle(Vec3f(6,3,-12), 3, 6, Vec3f(0,0,0), randomColor());
+    shapes[5] = new Sphere(Vec3f(0,1,-5), 1, randomColor());
+    shapes[6] = new Ellipse(Vec3f(-4,4,-3), Vec3f(-3,-1,-2), 1, Vec3f(0,0,1).normalize(), randomColor());
 
     const float rayZ = -height / (2.f * tan(fov / 2.f));
-    const Vec3f cameraPosition(0, 0, 0);
+    const Vec3f cameraPosition(0,0,0);
     Vec3f rayDirection;
     int y, x;
     for(y = 0; y < height; ++y)
