@@ -8,7 +8,7 @@ struct Shape
 {
     Vec3f Center, Color;
     Shape(const Vec3f &center, const Vec3f &color) : Center(center), Color(color) {}
-    virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const = 0;
+    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const = 0;
 };
 
 struct Sphere : public Shape
@@ -18,17 +18,17 @@ struct Sphere : public Shape
     Sphere(const Vec3f &center, const float radius, const Vec3f &color)
         : Shape(center, color), Radius(radius) {}
 
-    virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
+    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
     {
-        Vec3f L = Center - orig;
-        float tca = L*dir;
+        Vec3f L = Center - origin;
+        float tca = L*direction;
         float d2 = L*L - tca*tca;
         if (d2 > Radius*Radius) return false;
         float thc = sqrtf(Radius*Radius - d2);
-        d = tca - thc;// thc jest zawsze nieujemne, więc tca - thc jest zawsze mniejsze od tca + thc
-        if(d > 0) return true;
-        d = tca + thc;
-        return d > 0;
+        distance = tca - thc;// thc jest zawsze nieujemne, więc tca - thc jest zawsze mniejsze od tca + thc
+        if(distance > 0) return true;
+        distance = tca + thc;
+        return distance > 0;
     }
 };
 
@@ -39,7 +39,7 @@ struct Cube : Shape
     Cube(const Vec3f &center, const float edge, const Vec3f &color)
         : Shape(center, color), Edge(edge) {}
     
-    virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
+    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
     {
         return false;
     }
@@ -61,10 +61,11 @@ struct Circle : PlainShape
     const Vec3f &color)
         : PlainShape(center, direction, color), Radius(radius) {}
 
-    virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
+    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
     {
-        d = ( Normal*(Center - orig) ) / (Normal*dir);
-        return (orig + d*dir - Center).norm() <= Radius;
+        distance = ( Normal*(Center - origin) ) / (Normal*direction);
+        if(distance <= 0) return false;
+        return (origin + distance*direction - Center).norm() <= Radius;
     }
 };
 
@@ -73,10 +74,10 @@ struct Plane : public PlainShape
     Plane(const Vec3f &center, const Vec3f &direction, const Vec3f &color)
         : PlainShape(center, direction, color) {}
 
-    virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
+    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
     {
-        d = ( Normal*(Center - orig) ) / (Normal*dir);
-        return d > 0;
+        distance = ( Normal*(Center - origin) ) / (Normal*direction);
+        return distance > 0;
     }
 };
 
@@ -88,10 +89,11 @@ struct Rectangle : public PlainShape
         const Vec3f &direction, const Vec3f &color)
         : PlainShape(center, direction, color), Width(width), Height(height) {}
 
-    virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
+    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
     {
-        d = ( Vec3f(0,0,1)*(Center - orig) ) / (Vec3f(0,0,1)*dir);
-        Vec3f p = orig + d*dir;
+        distance = ( Vec3f(0,0,1)*(Center - origin) ) / (Vec3f(0,0,1)*direction);
+        if(distance <= 0) return false;
+        Vec3f p = origin + distance*direction;
         return (p.x >= Center.x - Width && p.x < Center.x + Width &&
                 p.y >= Center.y - Height && p.y < Center.y + Height);
     }
@@ -102,17 +104,20 @@ struct Ellipse : public PlainShape
     Vec3f Focus2;//Center == Focus1
     float FocusDistanceSum;
 
-    //additionalFociDistance - dodatkowa wartość sumy odległości ponad odległość między ogniskami, żeby zapobiec sytuacji, kiedy FocusDistanceSum jest mniejsze niż odległość między ogniskami i elipsa nie istnieje
-    Ellipse(const Vec3f &center1, const Vec3f &center2, const float additionalFociDistance,
+    /* additionalFocusesDistance - a value that is added to the distance between ellipse's 
+    focuses to avoid situation, when user given FocusDistanceSum is less than actual distance 
+    between focuses, so the ellipse does not exist */
+
+    Ellipse(const Vec3f &center1, const Vec3f &center2, const float additionalFocusesDistance,
     const Vec3f &direction, const Vec3f &color)
         : PlainShape(center1, direction, color), Focus2(center2),
-        FocusDistanceSum((center1 - center2).norm() + additionalFociDistance) {}
+        FocusDistanceSum((center1 - center2).norm() + additionalFocusesDistance) {}
 
-    virtual bool RayIntersect(const Vec3f &orig, const Vec3f &dir, float &d) const override
+    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
     {
-        d = ( Normal*(Center - orig) ) / (Normal*dir);
-        if(d <= 0) return false;
-        Vec3f p = orig + d*dir;
+        distance = ( Normal*(Center - origin) ) / (Normal*direction);
+        if(distance <= 0) return false;
+        Vec3f p = origin + distance*direction;
         return ((p - Center).norm() + (p - Focus2).norm() <= FocusDistanceSum);
     }
 };
