@@ -168,7 +168,7 @@ int main()
     shapes[6] = new Ellipse(Vec3f(-4,4,-3), Vec3f(-3,-1,-2), 1, Vec3f(0,0,1).normalize(), randomColor());*/
 
     Vec3f rotationAxis = Vec3f(1,1,-1).normalize();
-    dynamic_cast<Circle*>(shapes[0])->Normal.rotateAxis(rotationAxis, M_PI / 2);
+    dynamic_cast<Circle*>(shapes[0])->Normal.rotateAxisQuaternion(rotationAxis, M_PI / 2);
 
     const float rayZ = -height / (2.f * tan(fov / 2.f));
     const Vec3f cameraPosition(0,0,0);

@@ -41,13 +41,26 @@ void Vec3f::rotateZ(float angle)
     x = X * cosA - Y * sinA;
     y = X * sinA + Y * cosA;   
 }
-void Vec3f::rotateAxis(const Vec3f &axis, float angle)
+void Vec3f::rotateAxisMatrix(const Vec3f &axis, float angle)
 {
     // https://www.continuummechanics.org/rotationmatrix.html
     float vx = x, vy = y, vz = z, c = cos(angle), s = sin(angle);
     x = (c + (1 - c)*axis.x*axis.x)*vx +        ((1 - c)*axis.x*axis.y - s*axis.z)*vy +	((1 - c)*axis.x*axis.z + s*axis.y)*vz;
     y = ((1 - c)*axis.x*axis.y + s*axis.z)*vx +	(c + (1 - c)*axis.y*axis.y)*vy +		((1 - c)*axis.y*axis.z - s*axis.x)*vz;
 	z = ((1 - c)*axis.x*axis.z - s*axis.y)*vx +	((1 - c)*axis.y*axis.z + s*axis.x)*vy +	(c + (1 - c)*axis.z*axis.z)*vz;
+}
+void Vec3f::rotateAxisQuaternion(const Vec3f &axis, float angle)
+{
+    // https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
+    // q = cos(angle/2) + (axis.x*i + axis.y*i + axis.z*i)*sin(angle/2)
+    const float qr = cos(angle/2), s = sin(angle/2);
+    Vec3f qxyz(axis.x * s, axis.y * s, axis.z * s);
+
+    // https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
+    Vec3f vprime = 2.0f * (qxyz*(*this)) * qxyz
+          + (qr*qr - (qxyz*qxyz)) * (*this)
+          + 2.0f * qr * cross(qxyz, *this);
+    *this = vprime;
 }
 
 float operator*(const Vec3f &lhs, const Vec3f &rhs)
@@ -86,7 +99,7 @@ Vec3f operator-(const Vec3f &lhs)
     return lhs * float(-1);
 }
 
-Vec3f cross(Vec3f v1, Vec3f v2)
+Vec3f cross(const Vec3f &v1, const Vec3f &v2)
 {
     return Vec3f(v1.y*v2.z - v1.z*v2.y, v1.z*v2.x - v1.x*v2.z, v1.x*v2.y - v1.y*v2.x);
 }
