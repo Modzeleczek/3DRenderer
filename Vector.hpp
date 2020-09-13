@@ -15,6 +15,7 @@ struct Vec3f
     void rotateX(float angle);
     void rotateY(float angle);
     void rotateZ(float angle);
+    void rotateAxis(const Vec3f &axis, float angle);
 };
 
 float operator*(const Vec3f &lhs, const Vec3f &rhs);

@@ -41,6 +41,14 @@ void Vec3f::rotateZ(float angle)
     x = X * cosA - Y * sinA;
     y = X * sinA + Y * cosA;   
 }
+void Vec3f::rotateAxis(const Vec3f &axis, float angle)
+{
+    // https://www.continuummechanics.org/rotationmatrix.html
+    float vx = x, vy = y, vz = z, c = cos(angle), s = sin(angle);
+    x = (c + (1 - c)*axis.x*axis.x)*vx +        ((1 - c)*axis.x*axis.y - s*axis.z)*vy +	((1 - c)*axis.x*axis.z + s*axis.y)*vz;
+    y = ((1 - c)*axis.x*axis.y + s*axis.z)*vx +	(c + (1 - c)*axis.y*axis.y)*vy +		((1 - c)*axis.y*axis.z - s*axis.x)*vz;
+	z = ((1 - c)*axis.x*axis.z - s*axis.y)*vx +	((1 - c)*axis.y*axis.z + s*axis.x)*vy +	(c + (1 - c)*axis.z*axis.z)*vz;
+}
 
 float operator*(const Vec3f &lhs, const Vec3f &rhs)
 {
