@@ -174,12 +174,12 @@ int main()
     const Vec3f cameraPosition(0,0,0);
     Vec3f rayDirection;
     int y, x;
-    for(y = 0; y < height; ++y)
+    for(y = 0; y > -height; --y) // going from top
     {
-        for(x = 0; x < width; ++x)
+        for(x = 0; x < width; ++x) // going from left
         {
             rayDirection.x = x - width / 2.f;
-            rayDirection.y = -y + height / 2.f;
+            rayDirection.y = y + height / 2.f;
             rayDirection.z = rayZ;
             CastRay(cameraPosition, rayDirection.normalize(), shapes, noOfShapes, p++);
         }

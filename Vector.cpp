@@ -57,10 +57,9 @@ void Vec3f::rotateAxisQuaternion(const Vec3f &axis, float angle)
     Vec3f qxyz(axis.x * s, axis.y * s, axis.z * s);
 
     // https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
-    Vec3f vprime = 2.0f * (qxyz*(*this)) * qxyz
+    *this = 2.0f * (qxyz*(*this)) * qxyz
           + (qr*qr - (qxyz*qxyz)) * (*this)
           + 2.0f * qr * cross(qxyz, *this);
-    *this = vprime;
 }
 
 float operator*(const Vec3f &lhs, const Vec3f &rhs)
