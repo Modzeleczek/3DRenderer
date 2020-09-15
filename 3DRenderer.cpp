@@ -155,32 +155,48 @@ int main()
     const float fov = M_PI / 2.f;
     Vec3f *const bmpBuffer = new Vec3f[width * height], *p = bmpBuffer;
 
-    const uint8_t noOfShapes = 1;
+    const uint8_t noOfShapes = 7;
     Shape **shapes = new Shape*[noOfShapes];
 
     srand(time(0));
     shapes[0] = new Circle(Vec3f(6,3,-12), 3, Vec3f(1,1,0).normalize(), randomColor());
-    /*shapes[1] = new Plane(Vec3f(-5,-3,-12), Vec3f(1,0,0).normalize(), randomColor());
+    shapes[1] = new Plane(Vec3f(-5,-3,-12), Vec3f(1,0,0).normalize(), randomColor());
     shapes[2] = new Plane(Vec3f(5,-3,-12), Vec3f(-1,0,1).normalize(), randomColor());
     shapes[3] = new Plane(Vec3f(0,-4,0), Vec3f(0,1,0).normalize(), randomColor());
     shapes[4] = new Rectangle(Vec3f(6,3,-12), 3, 6, Vec3f(0,0,0), randomColor());
     shapes[5] = new Sphere(Vec3f(0,1,-5), 1, randomColor());
-    shapes[6] = new Ellipse(Vec3f(-4,4,-3), Vec3f(-3,-1,-2), 1, Vec3f(0,0,1).normalize(), randomColor());*/
+    shapes[6] = new Ellipse(Vec3f(-4,4,-3), Vec3f(-3,-1,-2), 1, Vec3f(0,0,1).normalize(), randomColor());
 
     Vec3f rotationAxis = Vec3f(1,1,-1).normalize();
     dynamic_cast<Circle*>(shapes[0])->Normal.rotateAxisQuaternion(rotationAxis, M_PI / 2);
 
-    const float rayZ = -height / (2.f * tan(fov / 2.f));
+    // position of the camera
     const Vec3f cameraPosition(0,0,0);
+    // a unit vector, which indicates screen's horizontal axis
+    Vec3f screenHorizontal(1,0,0);
+    // a unit vector, which indicates screen's vertical axis
+    Vec3f screenVertical(0,1,0);
+    // a vector, which is perpendicular to the screen (indicates camera's direction)
+    Vec3f cameraDirection(0,0,-1);
+    // The 3 vectors, screenHorizontal, screenVertical and cameraDirection, together make a 
+    // rotated coordinate system.
+    const float screenDistance = height / (2.f * tan(fov / 2.f));
+
+    // Negative angle rotates clockwise.
+    screenHorizontal.rotateY(-M_PI / 3);
+    screenVertical.rotateY(-M_PI / 3);
+    cameraDirection.rotateY(-M_PI / 3);
+
     Vec3f rayDirection;
     int y, x;
-    for(y = 0; y > -height; --y) // going from top
+    for(y = height / 2.f; y > -height / 2.f; --y) // going from top
     {
-        for(x = 0; x < width; ++x) // going from left
+        for(x = -width / 2.f; x < width / 2.f; ++x) // going from left
         {
-            rayDirection.x = x - width / 2.f;
-            rayDirection.y = y + height / 2.f;
-            rayDirection.z = rayZ;
+            rayDirection =
+            screenHorizontal * x +
+            screenVertical * y +
+            cameraDirection * screenDistance;
             CastRay(cameraPosition, rayDirection.normalize(), shapes, noOfShapes, p++);
         }
     }
