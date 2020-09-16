@@ -6,8 +6,7 @@
 struct Vec3f
 {
     float x, y, z;
-    Vec3f(float X, float Y, float Z);
-    Vec3f();
+    Vec3f(float X = 0, float Y = 0, float Z = 0);
     float& operator[](const size_t i);
     const float& operator[](const size_t i) const;
     float norm() const;
@@ -31,9 +30,18 @@ std::ostream& operator<<(std::ostream& out, const Vec3f& v);
 struct Vec4f
 {
     float x, y, z, w;
-    Vec4f(float X, float Y, float Z, float W);
-    Vec4f();
+    Vec4f(float X = 0, float Y = 0, float Z = 0, float W = 0);
     float& operator[](const size_t i);
     const float& operator[](const size_t i) const;
 };
+
+typedef uint8_t byte;
+struct Vec3b
+{
+    byte r, g, b;
+    Vec3b(byte R = 0, byte G = 0, byte B = 0);
+    byte& operator[](const size_t i);
+    const byte& operator[](const size_t i) const;
+};
+
 #endif //VECTOR_HPP

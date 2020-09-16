@@ -4,7 +4,6 @@
 #include <cassert>
 
 Vec3f::Vec3f(float X, float Y, float Z) : x(X), y(Y), z(Z) { }
-Vec3f::Vec3f() : x(0), y(0), z(0) { }
 
 float& Vec3f::operator[](const size_t i)
 {
@@ -109,8 +108,8 @@ std::ostream& operator<<(std::ostream& out, const Vec3f& v)
     return out;
 }
 
+
 Vec4f::Vec4f(float X, float Y, float Z, float W) : x(X), y(Y), z(Z), w(W) { }
-Vec4f::Vec4f() : x(0), y(0), z(0), w(0) { }
 
 float& Vec4f::operator[](const size_t i)
 {
@@ -119,4 +118,16 @@ float& Vec4f::operator[](const size_t i)
 const float& Vec4f::operator[](const size_t i) const
 {
     assert(i < 4); return i <= 0 ? x : (1 == i ? y : (2 == i ? z : w));
+}
+
+
+Vec3b::Vec3b(byte R, byte G, byte B) : r(R), g(G), b(B) { }
+
+byte& Vec3b::operator[](const size_t i)
+{
+    assert(i < 3); return i <= 0 ? r : (1 == i ? g : b);
+}
+const byte& Vec3b::operator[](const size_t i) const
+{
+    assert(i < 3); return i <= 0 ? r : (1 == i ? g : b);
 }

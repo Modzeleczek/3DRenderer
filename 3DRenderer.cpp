@@ -1,13 +1,14 @@
-#include "ImageSaver.hpp"
 #include "Vector.hpp"
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include "gif.h"
 
 struct Shape
 {
-    Vec3f Center, Color;
-    Shape(const Vec3f &center, const Vec3f &color) : Center(center), Color(color) {}
+    Vec3f Center;
+    Vec3b Color;
+    Shape(const Vec3f &center, const Vec3b &color) : Center(center), Color(color) {}
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const = 0;
 };
 
@@ -15,7 +16,7 @@ struct Sphere : public Shape
 {
     float Radius;
 
-    Sphere(const Vec3f &center, const float radius, const Vec3f &color)
+    Sphere(const Vec3f &center, const float radius, const Vec3b &color)
         : Shape(center, color), Radius(radius) {}
 
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
@@ -36,7 +37,7 @@ struct Cube : Shape
 {
     float Edge;
 
-    Cube(const Vec3f &center, const float edge, const Vec3f &color)
+    Cube(const Vec3f &center, const float edge, const Vec3b &color)
         : Shape(center, color), Edge(edge) {}
     
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
@@ -48,7 +49,7 @@ struct Cube : Shape
 struct PlainShape : Shape
 {
     Vec3f Normal;
-    PlainShape(const Vec3f &center, const Vec3f &normal, const Vec3f &color)
+    PlainShape(const Vec3f &center, const Vec3f &normal, const Vec3b &color)
         : Shape(center, color), Normal(normal) {}
     //virtual Vec3f getNormal(const Vec3f &hit) const = 0;
 };
@@ -58,7 +59,7 @@ struct Circle : PlainShape
     float Radius;
 
     Circle(const Vec3f &center, const float radius, const Vec3f &direction,
-    const Vec3f &color)
+    const Vec3b &color)
         : PlainShape(center, direction, color), Radius(radius) {}
 
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
@@ -71,7 +72,7 @@ struct Circle : PlainShape
 
 struct Plane : public PlainShape
 {
-    Plane(const Vec3f &center, const Vec3f &direction, const Vec3f &color)
+    Plane(const Vec3f &center, const Vec3f &direction, const Vec3b &color)
         : PlainShape(center, direction, color) {}
 
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
@@ -86,7 +87,7 @@ struct Rectangle : public PlainShape
     float Width, Height;
 
     Rectangle(const Vec3f &center, const float width, const float height,
-        const Vec3f &direction, const Vec3f &color)
+        const Vec3f &direction, const Vec3b &color)
         : PlainShape(center, direction, color), Width(width), Height(height) {}
 
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
@@ -109,7 +110,7 @@ struct Ellipse : public PlainShape
     between focuses, so the ellipse does not exist */
 
     Ellipse(const Vec3f &center1, const Vec3f &center2, const float additionalFocusesDistance,
-    const Vec3f &direction, const Vec3f &color)
+    const Vec3f &direction, const Vec3b &color)
         : PlainShape(center1, direction, color), Focus2(center2),
         FocusDistanceSum((center1 - center2).norm() + additionalFocusesDistance) {}
 
@@ -123,9 +124,9 @@ struct Ellipse : public PlainShape
 };
 
 void CastRay(const Vec3f &origin, const Vec3f &direction, Shape **shapes,
-const u_int8_t numberOfShapes, Vec3f *p)
+const byte numberOfShapes, byte *p)
 {
-    uint8_t i, closestIndex = 0;
+    byte i, closestIndex = 0;
     float closestShapeDistance = std::numeric_limits<float>::max(), distance;
     for(i = 0; i < numberOfShapes; ++i)
     {
@@ -137,25 +138,36 @@ const u_int8_t numberOfShapes, Vec3f *p)
         }
     }
     if(closestShapeDistance < 1000)
-        *p = 255 * shapes[closestIndex]->Color;
+    {
+        *(p++) = shapes[closestIndex]->Color.r;
+        *(p++) = shapes[closestIndex]->Color.g;
+        *(p++) = shapes[closestIndex]->Color.b;
+    }
     else
-        //background color
-        *p = Vec3f(0.f, 0.f, 0.f);
+    {
+        // background color Vec3b(0,0,0)
+        for(i = 0; i < 3; ++i)
+            *(p++) = 0;
+    }
 }
 
-inline Vec3f randomColor()
+inline Vec3b randomColor()
 {
-    return Vec3f( (rand() & 255) / 255.f, (rand() & 255) / 255.f, (rand() & 255) / 255.f );
+    return Vec3b( rand() & 255, rand() & 255, rand() & 255 );
 }
-//#define randomColor() {Vec3f( (rand() & 255) / 255.f, (rand() & 255) / 255.f, (rand() & 255) / 255.f )}
+//#define randomColor() {Vec3b( rand() & 255, rand() & 255, rand() & 255 )}
 
 int main()
 {
-    const int width = 1280, height = 720;
-    const float fov = M_PI / 2.f;
-    Vec3f *const bmpBuffer = new Vec3f[width * height], *p = bmpBuffer;
+    const int width = 64, height = 64;
+    const float fov = M_PI / 3.f;
 
-    const uint8_t noOfShapes = 7;
+    GifWriter writer;
+    const int delay = 5;
+	GifBegin(&writer, "output.gif", width, height, delay);
+    byte *const frameBuffer = new byte[width * height * 4], *p;
+
+    const byte noOfShapes = 7;
     Shape **shapes = new Shape*[noOfShapes];
 
     srand(time(0));
@@ -183,29 +195,44 @@ int main()
     const float screenDistance = height / (2.f * tan(fov / 2.f));
 
     // Negative angle rotates clockwise.
-    screenHorizontal.rotateY(-M_PI / 3);
-    screenVertical.rotateY(-M_PI / 3);
-    cameraDirection.rotateY(-M_PI / 3);
+    screenHorizontal.rotateY(-M_PI / 2);
+    screenVertical.rotateY(-M_PI / 2);
+    cameraDirection.rotateY(-M_PI / 2);
 
+    const uint32_t totalFrames = 512;
+    const float rotationVelocity = M_PI * 1.f / (float) totalFrames;
     Vec3f rayDirection;
     int y, x;
-    for(y = height / 2.f; y > -height / 2.f; --y) // going from top
+    uint32_t frameCounter = 0;
+    while(frameCounter < totalFrames)
     {
-        for(x = -width / 2.f; x < width / 2.f; ++x) // going from left
+        p = frameBuffer;
+        for(y = height / 2.f; y > -height / 2.f; --y) // going from top
         {
-            rayDirection =
-            screenHorizontal * x +
-            screenVertical * y +
-            cameraDirection * screenDistance;
-            CastRay(cameraPosition, rayDirection.normalize(), shapes, noOfShapes, p++);
+            for(x = -width / 2.f; x < width / 2.f; ++x) // going from left
+            {
+                rayDirection =
+                screenHorizontal * x +
+                screenVertical * y +
+                cameraDirection * screenDistance;
+                CastRay(cameraPosition, rayDirection.normalize(), shapes, noOfShapes, p);
+                p += 4;
+                // Adding 4, because every pixel is coded by four bytes. The fourth byte is 
+                // alpha value, which is ignored by GifWriter.
+            }
         }
+        screenHorizontal.rotateY(rotationVelocity);
+        screenVertical.rotateY(rotationVelocity);
+        cameraDirection.rotateY(rotationVelocity);
+        GifWriteFrame(&writer, frameBuffer, width, height, delay);
+        ++frameCounter;
     }
-    for(uint8_t i = 0; i < noOfShapes; ++i)
+    for(byte i = 0; i < noOfShapes; ++i)
         delete shapes[i];
     delete[] shapes;
 
-    BMPSaver("output", width, height, bmpBuffer).Save();
-    delete[] bmpBuffer;
+    GifEnd(&writer);
+    delete[] frameBuffer;
 
     return 0;
 }
