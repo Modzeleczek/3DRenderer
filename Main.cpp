@@ -17,13 +17,13 @@ int main()
 	GifBegin(&writer, "output.gif", renderer.Width, renderer.Height, delay);
 
     srand(time(0));
-    renderer.Shapes.push_back(new Circle(Vec3f(6,3,-12), 3, Vec3f(1,1,0).normalize(), randomColor()));
-    renderer.Shapes.push_back(new Plane(Vec3f(-5,-3,-12), Vec3f(1,0,0).normalize(), randomColor()));
-    renderer.Shapes.push_back(new Plane(Vec3f(5,-3,-12), Vec3f(-1,0,1).normalize(), randomColor()));
-    renderer.Shapes.push_back(new Plane(Vec3f(0,-4,0), Vec3f(0,1,0).normalize(), randomColor()));
+    renderer.Shapes.push_back(new Circle(Vec3f(6,3,-12), 3, Vec3f(1,1,0).Normalize(), randomColor()));
+    renderer.Shapes.push_back(new Plane(Vec3f(-5,-3,-12), Vec3f(1,0,0).Normalize(), randomColor()));
+    renderer.Shapes.push_back(new Plane(Vec3f(5,-3,-12), Vec3f(-1,0,1).Normalize(), randomColor()));
+    renderer.Shapes.push_back(new Plane(Vec3f(0,-4,0), Vec3f(0,1,0).Normalize(), randomColor()));
     renderer.Shapes.push_back(new Rectangle(Vec3f(6,3,-12), 3, 6, Vec3f(0,0,0), randomColor()));
     renderer.Shapes.push_back(new Sphere(Vec3f(0,1,-5), 1, randomColor()));
-    renderer.Shapes.push_back(new Ellipse(Vec3f(-4,4,-3), Vec3f(-3,-1,-2), 1, Vec3f(0,0,1).normalize(), 
+    renderer.Shapes.push_back(new Ellipse(Vec3f(-4,4,-3), Vec3f(-3,-1,-2), 1, Vec3f(0,0,1).Normalize(), 
         randomColor()));
 
     // Negative angle rotates clockwise.

@@ -48,10 +48,12 @@ struct Cube : Shape
 
 struct PlainShape : Shape
 {
-    Vec3f Normal;
+protected:
+    Vec3f Direction;
+public:
     PlainShape(const Vec3f &center, const Vec3f &normal, const Vec3b &color)
-        : Shape(center, color), Normal(normal) {}
-    //virtual Vec3f getNormal(const Vec3f &hit) const = 0;
+        : Shape(center, color), Direction(normal) {}
+    virtual void SetDirection(const Vec3f &direction) { Direction = direction; }
 };
 
 struct Circle : PlainShape
@@ -64,9 +66,9 @@ struct Circle : PlainShape
 
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
     {
-        distance = ( Normal*(Center - origin) ) / (Normal*direction);
+        distance = ( Direction*(Center - origin) ) / (Direction*direction);
         if(distance <= 0) return false;
-        return (origin + distance*direction - Center).norm() <= Radius;
+        return (origin + distance*direction - Center).Norm() <= Radius;
     }
 };
 
@@ -77,7 +79,7 @@ struct Plane : public PlainShape
 
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
     {
-        distance = ( Normal*(Center - origin) ) / (Normal*direction);
+        distance = ( Direction*(Center - origin) ) / (Direction*direction);
         return distance > 0;
     }
 };
@@ -112,14 +114,14 @@ struct Ellipse : public PlainShape
     Ellipse(const Vec3f &center1, const Vec3f &center2, const float additionalFocusesDistance,
     const Vec3f &direction, const Vec3b &color)
         : PlainShape(center1, direction, color), Focus2(center2),
-        FocusDistanceSum((center1 - center2).norm() + additionalFocusesDistance) {}
+        FocusDistanceSum((center1 - center2).Norm() + additionalFocusesDistance) {}
 
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
     {
-        distance = ( Normal*(Center - origin) ) / (Normal*direction);
+        distance = ( Direction*(Center - origin) ) / (Direction*direction);
         if(distance <= 0) return false;
         Vec3f p = origin + distance*direction;
-        return ((p - Center).norm() + (p - Focus2).norm() <= FocusDistanceSum);
+        return ((p - Center).Norm() + (p - Focus2).Norm() <= FocusDistanceSum);
     }
 };
 #endif // SHAPES_CPP

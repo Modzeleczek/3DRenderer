@@ -13,34 +13,34 @@ const float& Vec3f::operator[](const size_t i) const
 {
     assert(i < 3); return i <= 0 ? x : (1 == i ? y : z);
 }
-float Vec3f::norm() const
+float Vec3f::Norm() const
 {
     return std::sqrt(x*x + y*y + z*z);
 }
-Vec3f& Vec3f::normalize()
+Vec3f& Vec3f::Normalize()
 {
-    *this = (*this) * (1.f / norm());
+    *this = (*this) * (1.f / Norm());
     return *this;
 }
-void Vec3f::rotateX(float angle)
+void Vec3f::RotateX(float angle)
 {
     const float Y = y, Z = z, sinA = sin(angle), cosA = cos(angle);
     y = Y * cosA - Z * sinA;
     z = Y * sinA + Z * cosA;
 }
-void Vec3f::rotateY(float angle)
+void Vec3f::RotateY(float angle)
 {
     const float X = x, Z = z, sinA = sin(angle), cosA = cos(angle);
     x = X * cosA + Z * sinA;
     z = -X * sinA + Z * cosA;
 }
-void Vec3f::rotateZ(float angle)
+void Vec3f::RotateZ(float angle)
 {
     const float X = x, Y = y, sinA = sin(angle), cosA = cos(angle);
     x = X * cosA - Y * sinA;
     y = X * sinA + Y * cosA;   
 }
-void Vec3f::rotateAxisMatrix(const Vec3f &axis, float angle)
+void Vec3f::RotateAxisMatrix(const Vec3f &axis, float angle)
 {
     // https://www.continuummechanics.org/rotationmatrix.html
     float vx = x, vy = y, vz = z, c = cos(angle), s = sin(angle);
@@ -48,7 +48,7 @@ void Vec3f::rotateAxisMatrix(const Vec3f &axis, float angle)
     y = ((1 - c)*axis.x*axis.y + s*axis.z)*vx +	(c + (1 - c)*axis.y*axis.y)*vy +		((1 - c)*axis.y*axis.z - s*axis.x)*vz;
 	z = ((1 - c)*axis.x*axis.z - s*axis.y)*vx +	((1 - c)*axis.y*axis.z + s*axis.x)*vy +	(c + (1 - c)*axis.z*axis.z)*vz;
 }
-void Vec3f::rotateAxisQuaternion(const Vec3f &axis, float angle)
+void Vec3f::RotateAxisQuaternion(const Vec3f &axis, float angle)
 {
     // https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
     // q = cos(angle/2) + (axis.x*i + axis.y*i + axis.z*i)*sin(angle/2)
@@ -58,7 +58,7 @@ void Vec3f::rotateAxisQuaternion(const Vec3f &axis, float angle)
     // https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion
     *this = 2.0f * (qxyz*(*this)) * qxyz
           + (qr*qr - (qxyz*qxyz)) * (*this)
-          + 2.0f * qr * cross(qxyz, *this);
+          + 2.0f * qr * Cross(qxyz, *this);
 }
 
 float operator*(const Vec3f &lhs, const Vec3f &rhs)
@@ -97,7 +97,7 @@ Vec3f operator-(const Vec3f &lhs)
     return lhs * float(-1);
 }
 
-Vec3f cross(const Vec3f &v1, const Vec3f &v2)
+Vec3f Cross(const Vec3f &v1, const Vec3f &v2)
 {
     return Vec3f(v1.y*v2.z - v1.z*v2.y, v1.z*v2.x - v1.x*v2.z, v1.x*v2.y - v1.y*v2.x);
 }

@@ -43,27 +43,27 @@ private:
         }
         void RotateX(float angle)
         {
-            Direction.rotateX(angle);
-            HorizontalAxis.rotateX(angle);
-            VerticalAxis.rotateX(angle);
+            Direction.RotateX(angle);
+            HorizontalAxis.RotateX(angle);
+            VerticalAxis.RotateX(angle);
         }
         void RotateY(float angle)
         {
-            Direction.rotateY(angle);
-            HorizontalAxis.rotateY(angle);
-            VerticalAxis.rotateY(angle);
+            Direction.RotateY(angle);
+            HorizontalAxis.RotateY(angle);
+            VerticalAxis.RotateY(angle);
         }
         void RotateZ(float angle)
         {
-            Direction.rotateZ(angle);
-            HorizontalAxis.rotateZ(angle);
-            VerticalAxis.rotateZ(angle);
+            Direction.RotateZ(angle);
+            HorizontalAxis.RotateZ(angle);
+            VerticalAxis.RotateZ(angle);
         }
         void RotateAxis(const Vec3f &axis, float angle)
         {
-            Direction.rotateAxisQuaternion(axis, angle);
-            HorizontalAxis.rotateAxisQuaternion(axis, angle);
-            VerticalAxis.rotateAxisQuaternion(axis, angle);
+            Direction.RotateAxisQuaternion(axis, angle);
+            HorizontalAxis.RotateAxisQuaternion(axis, angle);
+            VerticalAxis.RotateAxisQuaternion(axis, angle);
         }
         Vec3f GetScreenPixelPosition(const int x, const int y)
         {
@@ -98,7 +98,7 @@ public:
         {
             for(x = -Width / 2; x < Width / 2; ++x) // going from left
             {
-                CastRay(Eye.GetScreenPixelPosition(x, y).normalize(), p);
+                CastRay(Eye.GetScreenPixelPosition(x, y).Normalize(), p);
                 p += 4;
                 // Adding 4, because every pixel is coded by four bytes. The fourth byte is 
                 // alpha value, which is ignored by GifWriter.

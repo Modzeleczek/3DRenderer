@@ -9,13 +9,13 @@ struct Vec3f
     Vec3f(float X = 0, float Y = 0, float Z = 0);
     float& operator[](const size_t i);
     const float& operator[](const size_t i) const;
-    float norm() const;
-    Vec3f& normalize();
-    void rotateX(float angle);
-    void rotateY(float angle);
-    void rotateZ(float angle);
-    void rotateAxisMatrix(const Vec3f &axis, float angle);
-    void rotateAxisQuaternion(const Vec3f &axis, float angle);
+    float Norm() const;
+    Vec3f& Normalize();
+    void RotateX(float angle);
+    void RotateY(float angle);
+    void RotateZ(float angle);
+    void RotateAxisMatrix(const Vec3f &axis, float angle);
+    void RotateAxisQuaternion(const Vec3f &axis, float angle);
 };
 
 float operator*(const Vec3f &lhs, const Vec3f &rhs);
@@ -24,7 +24,7 @@ Vec3f operator-(Vec3f lhs, const Vec3f &rhs);
 Vec3f operator*(const Vec3f &lhs, const float &rhs);
 Vec3f operator*(const float &lhs, const Vec3f &rhs);
 Vec3f operator-(const Vec3f &lhs);
-Vec3f cross(const Vec3f &v1, const Vec3f &v2);
+Vec3f Cross(const Vec3f &v1, const Vec3f &v2);
 std::ostream& operator<<(std::ostream& out, const Vec3f& v);
 
 struct Vec4f
