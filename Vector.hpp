@@ -10,7 +10,7 @@ struct Vec3f
     float& operator[](const size_t i);
     const float& operator[](const size_t i) const;
     float norm() const;
-    Vec3f& normalize(float coefficient = 1.f);
+    Vec3f& normalize();
     void rotateX(float angle);
     void rotateY(float angle);
     void rotateZ(float angle);

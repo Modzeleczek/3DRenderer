@@ -17,9 +17,9 @@ float Vec3f::norm() const
 {
     return std::sqrt(x*x + y*y + z*z);
 }
-Vec3f& Vec3f::normalize(float coefficient)
+Vec3f& Vec3f::normalize()
 {
-    *this = (*this) * (coefficient / norm());
+    *this = (*this) * (1.f / norm());
     return *this;
 }
 void Vec3f::rotateX(float angle)

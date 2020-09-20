@@ -3,6 +3,7 @@
 #include <iostream>
 #include <limits>
 #include "gif.h"
+#include <vector>
 
 struct Shape
 {
@@ -123,33 +124,142 @@ struct Ellipse : public PlainShape
     }
 };
 
-void CastRay(const Vec3f &origin, const Vec3f &direction, Shape **shapes,
-const byte numberOfShapes, byte *p)
+class Renderer
 {
-    byte i, closestIndex = 0;
-    float closestShapeDistance = std::numeric_limits<float>::max(), distance;
-    for(i = 0; i < numberOfShapes; ++i)
+private:
+    class Camera
     {
-        if(shapes[i]->RayIntersect(origin, direction, distance) &&
-           distance < closestShapeDistance)
+    public:
+        // position of the camera
+        Vec3f Position;
+    private:
+        // a unit vector, which indicates screen's horizontal axis
+        Vec3f HorizontalAxis;
+        // a unit vector, which indicates screen's vertical axis
+        Vec3f VerticalAxis;
+        // a vector, which is perpendicular to the screen (indicates camera's direction)
+        Vec3f Direction;
+        // The 3 vectors, HorizontalAxis, VerticalAxis and Direction, together make a 
+        // rotated coordinate system.
+        // distance between camera and screen depending on field of view
+        float ScreenDistance;
+
+    public:
+        Camera(uint32_t frameHeight = 512, float fieldOfView = M_PI / 3.f, const Vec3f &position = Vec3f(0,0,0))
         {
-            closestShapeDistance = distance;
-            closestIndex = i;
+            Position = position;
+            Direction = Vec3f(0,0,-1);
+            HorizontalAxis = Vec3f(1,0,0);
+            VerticalAxis = Vec3f(0,1,0);
+            SetFieldOfView(frameHeight, fieldOfView);
+        }
+        void SetFieldOfView(int frameHeight, float fieldOfView)
+        {
+            ScreenDistance = frameHeight / (2.f * tan(fieldOfView / 2.f));
+        }
+        void RotateX(float angle)
+        {
+            Direction.rotateX(angle);
+            HorizontalAxis.rotateX(angle);
+            VerticalAxis.rotateX(angle);
+        }
+        void RotateY(float angle)
+        {
+            Direction.rotateY(angle);
+            HorizontalAxis.rotateY(angle);
+            VerticalAxis.rotateY(angle);
+        }
+        void RotateZ(float angle)
+        {
+            Direction.rotateZ(angle);
+            HorizontalAxis.rotateZ(angle);
+            VerticalAxis.rotateZ(angle);
+        }
+        void RotateAxis(const Vec3f &axis, float angle)
+        {
+            Direction.rotateAxisQuaternion(axis, angle);
+            HorizontalAxis.rotateAxisQuaternion(axis, angle);
+            VerticalAxis.rotateAxisQuaternion(axis, angle);
+        }
+        Vec3f GetScreenPixelPosition(const int x, const int y)
+        {
+            return HorizontalAxis * x + VerticalAxis * y + Direction * ScreenDistance;
+        }
+    };
+
+    int Width, Height;
+    byte *FrameBuffer;
+
+public:
+    std::vector<Shape*> Shapes;
+
+    Camera Eye;
+    Renderer(uint32_t frameWidth = 512, uint32_t frameHeight = 512)
+    {
+        Width = frameWidth;
+        Height = frameHeight;
+        FrameBuffer = new byte[Width * Height * 4]; // 4 bytes per pixel (RGBA)
+
+        Eye = Camera(frameHeight);
+    }
+    ~Renderer()
+    {
+        if(FrameBuffer)
+            delete[] FrameBuffer;
+        for(size_t i = 0; i < Shapes.size(); ++i)
+            if(Shapes[i])
+                delete Shapes[i];
+    }
+
+    //    int & Width()       { return Width_; } // get, set
+    const int & GetWidth() const { return Width; } // get only
+    const int & GetHeight() const { return Height; }
+    const byte* GetFrameBuffer() const { return FrameBuffer; }
+
+    void RenderFrame()
+    {
+        int y, x;
+        byte *p = FrameBuffer;
+        for(y = Height / 2; y > -Height / 2; --y) // going from top
+        {
+            for(x = -Width / 2; x < Width / 2; ++x) // going from left
+            {
+                CastRay(Eye.GetScreenPixelPosition(x, y).normalize(), p);
+                p += 4;
+                // Adding 4, because every pixel is coded by four bytes. The fourth byte is 
+                // alpha value, which is ignored by GifWriter.
+            }
         }
     }
-    if(closestShapeDistance < 1000)
+
+private:
+    void CastRay(const Vec3f &direction, byte *p)
     {
-        *(p++) = shapes[closestIndex]->Color.r;
-        *(p++) = shapes[closestIndex]->Color.g;
-        *(p++) = shapes[closestIndex]->Color.b;
+        byte i, closestIndex = 0;
+        float closestShapeDistance = std::numeric_limits<float>::max(), distance;
+        for(i = 1; i < Shapes.size(); ++i)
+        {
+            if(Shapes[i]->RayIntersect(Eye.Position, direction, distance) &&
+            distance < closestShapeDistance)
+            {
+                closestShapeDistance = distance;
+                closestIndex = i;
+            }
+        }
+        if(closestShapeDistance < 1000)
+        {
+            *(p++) = Shapes[closestIndex]->Color.r;
+            *(p++) = Shapes[closestIndex]->Color.g;
+            *(p++) = Shapes[closestIndex]->Color.b;
+        }
+        else
+        {
+            // background color Vec3b(0,0,0)
+            for(i = 0; i < 3; ++i)
+                *(p++) = 0;
+        }
     }
-    else
-    {
-        // background color Vec3b(0,0,0)
-        for(i = 0; i < 3; ++i)
-            *(p++) = 0;
-    }
-}
+};
 
 inline Vec3b randomColor()
 {
@@ -159,80 +269,36 @@ inline Vec3b randomColor()
 
 int main()
 {
-    const int width = 64, height = 64;
-    const float fov = M_PI / 3.f;
-
+    Renderer renderer;
     GifWriter writer;
-    const int delay = 5;
-	GifBegin(&writer, "output.gif", width, height, delay);
-    byte *const frameBuffer = new byte[width * height * 4], *p;
-
-    const byte noOfShapes = 7;
-    Shape **shapes = new Shape*[noOfShapes];
+    const uint32_t delay = 5;
+	GifBegin(&writer, "output.gif", renderer.GetWidth(), renderer.GetHeight(), delay);
 
     srand(time(0));
-    shapes[0] = new Circle(Vec3f(6,3,-12), 3, Vec3f(1,1,0).normalize(), randomColor());
-    shapes[1] = new Plane(Vec3f(-5,-3,-12), Vec3f(1,0,0).normalize(), randomColor());
-    shapes[2] = new Plane(Vec3f(5,-3,-12), Vec3f(-1,0,1).normalize(), randomColor());
-    shapes[3] = new Plane(Vec3f(0,-4,0), Vec3f(0,1,0).normalize(), randomColor());
-    shapes[4] = new Rectangle(Vec3f(6,3,-12), 3, 6, Vec3f(0,0,0), randomColor());
-    shapes[5] = new Sphere(Vec3f(0,1,-5), 1, randomColor());
-    shapes[6] = new Ellipse(Vec3f(-4,4,-3), Vec3f(-3,-1,-2), 1, Vec3f(0,0,1).normalize(), randomColor());
-
-    Vec3f rotationAxis = Vec3f(1,1,-1).normalize();
-    dynamic_cast<Circle*>(shapes[0])->Normal.rotateAxisQuaternion(rotationAxis, M_PI / 2);
-
-    // position of the camera
-    const Vec3f cameraPosition(0,0,0);
-    // a unit vector, which indicates screen's horizontal axis
-    Vec3f screenHorizontal(1,0,0);
-    // a unit vector, which indicates screen's vertical axis
-    Vec3f screenVertical(0,1,0);
-    // a vector, which is perpendicular to the screen (indicates camera's direction)
-    Vec3f cameraDirection(0,0,-1);
-    // The 3 vectors, screenHorizontal, screenVertical and cameraDirection, together make a 
-    // rotated coordinate system.
-    const float screenDistance = height / (2.f * tan(fov / 2.f));
+    renderer.Shapes.push_back(new Circle(Vec3f(6,3,-12), 3, Vec3f(1,1,0).normalize(), randomColor()));
+    renderer.Shapes.push_back(new Plane(Vec3f(-5,-3,-12), Vec3f(1,0,0).normalize(), randomColor()));
+    renderer.Shapes.push_back(new Plane(Vec3f(5,-3,-12), Vec3f(-1,0,1).normalize(), randomColor()));
+    renderer.Shapes.push_back(new Plane(Vec3f(0,-4,0), Vec3f(0,1,0).normalize(), randomColor()));
+    renderer.Shapes.push_back(new Rectangle(Vec3f(6,3,-12), 3, 6, Vec3f(0,0,0), randomColor()));
+    renderer.Shapes.push_back(new Sphere(Vec3f(0,1,-5), 1, randomColor()));
+    renderer.Shapes.push_back(new Ellipse(Vec3f(-4,4,-3), Vec3f(-3,-1,-2), 1, Vec3f(0,0,1).normalize(), 
+        randomColor()));
 
     // Negative angle rotates clockwise.
-    screenHorizontal.rotateY(-M_PI / 2);
-    screenVertical.rotateY(-M_PI / 2);
-    cameraDirection.rotateY(-M_PI / 2);
+    renderer.Eye.RotateY(-M_PI / 2);
 
-    const uint32_t totalFrames = 512;
+    const uint32_t totalFrames = 256;
     const float rotationVelocity = M_PI * 1.f / (float) totalFrames;
-    Vec3f rayDirection;
-    int y, x;
     uint32_t frameCounter = 0;
     while(frameCounter < totalFrames)
     {
-        p = frameBuffer;
-        for(y = height / 2.f; y > -height / 2.f; --y) // going from top
-        {
-            for(x = -width / 2.f; x < width / 2.f; ++x) // going from left
-            {
-                rayDirection =
-                screenHorizontal * x +
-                screenVertical * y +
-                cameraDirection * screenDistance;
-                CastRay(cameraPosition, rayDirection.normalize(), shapes, noOfShapes, p);
-                p += 4;
-                // Adding 4, because every pixel is coded by four bytes. The fourth byte is 
-                // alpha value, which is ignored by GifWriter.
-            }
-        }
-        screenHorizontal.rotateY(rotationVelocity);
-        screenVertical.rotateY(rotationVelocity);
-        cameraDirection.rotateY(rotationVelocity);
-        GifWriteFrame(&writer, frameBuffer, width, height, delay);
+        renderer.RenderFrame();
+        GifWriteFrame(&writer, renderer.GetFrameBuffer(), 
+            renderer.GetWidth(), renderer.GetHeight(), delay);
+        renderer.Eye.RotateY(rotationVelocity);
         ++frameCounter;
     }
-    for(byte i = 0; i < noOfShapes; ++i)
-        delete shapes[i];
-    delete[] shapes;
-
     GifEnd(&writer);
-    delete[] frameBuffer;
 
     return 0;
 }
