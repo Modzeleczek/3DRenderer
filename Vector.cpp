@@ -109,18 +109,6 @@ std::ostream& operator<<(std::ostream& out, const Vec3f &v)
 }
 
 
-Vec4f::Vec4f(float x, float y, float z, float w) : X(x), Y(y), Z(z), W(w) { }
-
-float& Vec4f::operator[](const size_t i)
-{
-    assert(i < 4); return i <= 0 ? X : (1 == i ? Y : (2 == i ? Z : W));
-}
-const float& Vec4f::operator[](const size_t i) const
-{
-    assert(i < 4); return i <= 0 ? X : (1 == i ? Y : (2 == i ? Z : W));
-}
-
-
 Vec3b::Vec3b(byte r, byte g, byte b) : R(r), G(g), B(b) { }
 
 byte& Vec3b::operator[](const size_t i)

@@ -27,13 +27,6 @@ Vec3f operator-(const Vec3f &lhs);
 Vec3f Cross(const Vec3f &v1, const Vec3f &v2); // cross product
 std::ostream& operator<<(std::ostream& out, const Vec3f& v);
 
-struct Vec4f
-{
-    float X, Y, Z, W;
-    Vec4f(float x = 0, float y = 0, float z = 0, float w = 0);
-    float& operator[](const size_t i);
-    const float& operator[](const size_t i) const;
-};
 
 typedef uint8_t byte;
 struct Vec3b
@@ -43,5 +36,4 @@ struct Vec3b
     byte& operator[](const size_t i);
     const byte& operator[](const size_t i) const;
 };
-
 #endif //VECTOR_HPP
