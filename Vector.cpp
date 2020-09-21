@@ -61,40 +61,40 @@ void Vec3f::RotateAxisQuaternion(const Vec3f &axis, float angle)
           + 2.0f * qr * Cross(qxyz, *this);
 }
 
-float operator*(const Vec3f &lhs, const Vec3f &rhs)
+float operator*(const Vec3f &v1, const Vec3f &v2)
 {
-    return lhs.X * rhs.X + lhs.Y * rhs.Y + lhs.Z * rhs.Z;
+    return v1.X * v2.X + v1.Y * v2.Y + v1.Z * v2.Z;
 }
 
-Vec3f operator+(Vec3f lhs, const Vec3f &rhs)
+Vec3f operator+(Vec3f v1, const Vec3f &v2)
 {
-    lhs.X += rhs.X;
-    lhs.Y += rhs.Y;
-    lhs.Z += rhs.Z;
-    return lhs;
+    v1.X += v2.X;
+    v1.Y += v2.Y;
+    v1.Z += v2.Z;
+    return v1;
 }
 
-Vec3f operator-(Vec3f lhs, const Vec3f &rhs)
+Vec3f operator-(Vec3f v1, const Vec3f &v2)
 {
-    lhs.X -= rhs.X;
-    lhs.Y -= rhs.Y;
-    lhs.Z -= rhs.Z;
-    return lhs;
+    v1.X -= v2.X;
+    v1.Y -= v2.Y;
+    v1.Z -= v2.Z;
+    return v1;
 }
 
-Vec3f operator*(const Vec3f &lhs, const float &rhs)
+Vec3f operator*(const Vec3f &v, float factor)
 {
-    return Vec3f(lhs.X * rhs, lhs.Y * rhs, lhs.Z * rhs);
+    return Vec3f(v.X * factor, v.Y * factor, v.Z * factor);
 }
 
-Vec3f operator*(const float &lhs, const Vec3f &rhs)
+Vec3f operator*(float factor, const Vec3f &v)
 {
-    return rhs * lhs;
+    return v * factor;
 }
 
-Vec3f operator-(const Vec3f &lhs)
+Vec3f operator-(const Vec3f &v)
 {
-    return lhs * float(-1);
+    return v * -1.f;
 }
 
 Vec3f Cross(const Vec3f &v1, const Vec3f &v2)
@@ -102,7 +102,7 @@ Vec3f Cross(const Vec3f &v1, const Vec3f &v2)
     return Vec3f(v1.Y*v2.Z - v1.Z*v2.Y, v1.Z*v2.X - v1.X*v2.Z, v1.X*v2.Y - v1.Y*v2.X);
 }
 
-std::ostream& operator<<(std::ostream& out, const Vec3f &v)
+std::ostream& operator<<(std::ostream &out, const Vec3f &v)
 {
     out << v.X << ' ' << v.Y << ' ' << v.Z;
     return out;

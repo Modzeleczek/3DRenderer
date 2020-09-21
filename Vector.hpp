@@ -18,14 +18,14 @@ struct Vec3f
     void RotateAxisQuaternion(const Vec3f &axis, float angle);
 };
 
-float operator*(const Vec3f &lhs, const Vec3f &rhs); // dot product
-Vec3f operator+(Vec3f lhs, const Vec3f &rhs);
-Vec3f operator-(Vec3f lhs, const Vec3f &rhs);
-Vec3f operator*(const Vec3f &lhs, const float &rhs);
-Vec3f operator*(const float &lhs, const Vec3f &rhs);
-Vec3f operator-(const Vec3f &lhs);
+float operator*(const Vec3f &v1, const Vec3f &v2); // dot product
+Vec3f operator+(Vec3f v1, const Vec3f &v2);
+Vec3f operator-(Vec3f v1, const Vec3f &v2);
+Vec3f operator*(const Vec3f &v, float factor);
+Vec3f operator*(float factor, const Vec3f &v);
+Vec3f operator-(const Vec3f &v);
 Vec3f Cross(const Vec3f &v1, const Vec3f &v2); // cross product
-std::ostream& operator<<(std::ostream& out, const Vec3f& v);
+std::ostream& operator<<(std::ostream &out, const Vec3f &v);
 
 
 typedef uint8_t byte;
