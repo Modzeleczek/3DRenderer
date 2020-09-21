@@ -5,8 +5,8 @@
 
 struct Vec3f
 {
-    float x, y, z;
-    Vec3f(float X = 0, float Y = 0, float Z = 0);
+    float X, Y, Z;
+    Vec3f(float x = 0, float y = 0, float z = 0);
     float& operator[](const size_t i);
     const float& operator[](const size_t i) const;
     float Norm() const;
@@ -18,19 +18,19 @@ struct Vec3f
     void RotateAxisQuaternion(const Vec3f &axis, float angle);
 };
 
-float operator*(const Vec3f &lhs, const Vec3f &rhs);
+float operator*(const Vec3f &lhs, const Vec3f &rhs); // dot product
 Vec3f operator+(Vec3f lhs, const Vec3f &rhs);
 Vec3f operator-(Vec3f lhs, const Vec3f &rhs);
 Vec3f operator*(const Vec3f &lhs, const float &rhs);
 Vec3f operator*(const float &lhs, const Vec3f &rhs);
 Vec3f operator-(const Vec3f &lhs);
-Vec3f Cross(const Vec3f &v1, const Vec3f &v2);
+Vec3f Cross(const Vec3f &v1, const Vec3f &v2); // cross product
 std::ostream& operator<<(std::ostream& out, const Vec3f& v);
 
 struct Vec4f
 {
-    float x, y, z, w;
-    Vec4f(float X = 0, float Y = 0, float Z = 0, float W = 0);
+    float X, Y, Z, W;
+    Vec4f(float x = 0, float y = 0, float z = 0, float w = 0);
     float& operator[](const size_t i);
     const float& operator[](const size_t i) const;
 };
@@ -38,8 +38,8 @@ struct Vec4f
 typedef uint8_t byte;
 struct Vec3b
 {
-    byte r, g, b;
-    Vec3b(byte R = 0, byte G = 0, byte B = 0);
+    byte R, G, B;
+    Vec3b(byte r = 0, byte g = 0, byte b = 0);
     byte& operator[](const size_t i);
     const byte& operator[](const size_t i) const;
 };

@@ -97,8 +97,8 @@ struct Rectangle : public PlainShape
         distance = ( Vec3f(0,0,1)*(Center - origin) ) / (Vec3f(0,0,1)*direction);
         if(distance <= 0) return false;
         Vec3f p = origin + distance*direction;
-        return (p.x >= Center.x - Width && p.x < Center.x + Width &&
-                p.y >= Center.y - Height && p.y < Center.y + Height);
+        return (p.X >= Center.X - Width && p.X < Center.X + Width &&
+                p.Y >= Center.Y - Height && p.Y < Center.Y + Height);
     }
 };
 

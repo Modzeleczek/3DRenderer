@@ -122,9 +122,9 @@ private:
         }
         if(closestShapeDistance < 1000)
         {
-            *(pixelPointer++) = Shapes[closestIndex]->Color.r;
-            *(pixelPointer++) = Shapes[closestIndex]->Color.g;
-            *(pixelPointer++) = Shapes[closestIndex]->Color.b;
+            *(pixelPointer++) = Shapes[closestIndex]->Color.R;
+            *(pixelPointer++) = Shapes[closestIndex]->Color.G;
+            *(pixelPointer++) = Shapes[closestIndex]->Color.B;
         }
         else
         {
