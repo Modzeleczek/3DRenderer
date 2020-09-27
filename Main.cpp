@@ -27,16 +27,19 @@ int main()
         randomColor()));
 
     // Negative angle rotates clockwise.
-    renderer.Eye.RotateY(-M_PI / 2);
+    //renderer.Eye.RotateY(-M_PI / 2);
 
     const uint32_t totalFrames = 128;
-    const float rotationVelocity = M_PI * 1.f / (float) totalFrames;
+    //const float rotationVelocity = M_PI * 1.f / (float) totalFrames;
+    float targetX = -5.f / 2.f;
     for(uint32_t frameCounter = 0; frameCounter < totalFrames; ++frameCounter)
     {
+        renderer.Eye.SetDirection(Vec3f(targetX,-3,-10).Normalize());
         renderer.RenderFrame();
         GifWriteFrame(&writer, renderer.FrameBuffer, 
             renderer.Width, renderer.Height, delay);
-        renderer.Eye.RotateY(rotationVelocity);
+        //renderer.Eye.RotateY(rotationVelocity);
+        targetX += 0.25f;
     }
     GifEnd(&writer);
 

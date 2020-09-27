@@ -70,6 +70,59 @@ private:
         {
             return HorizontalAxis * x + VerticalAxis * y + Direction * ScreenDistance;
         }
+        void SetDirection(const Vec3f &direction)
+        {
+            /*
+            Algorytm:
+            - wyznacz kąt a, o jaki trzeba obrócić wektor (0,0,1) wokół osi X i kąt b, o jaki trzeba obrócić wektor (0,0,1) wokół osi Y, aby otrzymać direction
+            - ustaw: HorizontalAxis na domyślną wartość (1,0,0), VerticalAxis na domyślną wartość (0,1,0)
+            - obróć HorizontalAxis i VerticalAxis o kąty a, b odpowiednio wokół osi X, Y
+            - wpisz direction do Direction
+            
+            cosB = direction.Z / 1
+            sinB = direction.X / 1
+            cosA = direction.Z / 1
+            sinA = direction.Y / 1
+            */
+
+            const float cosA_and_cosB = direction.Z,
+                        sinB = direction.X,
+                        sinA = direction.Y;
+
+            // set HorizontalAxis to (1,0,0)
+            HorizontalAxis = Vec3f(1,0,0);
+            // set VerticalAxis to (0,1,0)
+            VerticalAxis = Vec3f(0,1,0);
+
+            // vector's coordinates before rotation
+            float x, y, z;
+
+            // rotate HorizontalAxis around the X axis
+            y = HorizontalAxis.Y;
+            z = HorizontalAxis.Z;
+            HorizontalAxis.Y = y * cosA_and_cosB - z * sinA;
+            HorizontalAxis.Z = y * sinA + z * cosA_and_cosB;
+
+            x = HorizontalAxis.X;
+            z = HorizontalAxis.Z;
+            // rotate HorizontalAxis around the Y axis
+            HorizontalAxis.X = x * cosA_and_cosB + z * sinB;
+            HorizontalAxis.Z = -x * sinB + z * cosA_and_cosB;
+
+            // rotate VerticalAxis around the X axis
+            y = VerticalAxis.Y;
+            z = VerticalAxis.Z;
+            VerticalAxis.Y = y * cosA_and_cosB - z * sinA;
+            VerticalAxis.Z = y * sinA + z * cosA_and_cosB;
+
+            x = VerticalAxis.X;
+            z = VerticalAxis.Z;
+            // rotate VerticalAxis around the Y axis
+            VerticalAxis.X = x * cosA_and_cosB + z * sinB;
+            VerticalAxis.Z = -x * sinB + z * cosA_and_cosB;
+            
+            Direction = direction;
+        }
     };
 
 public:
