@@ -25,11 +25,12 @@ private:
         // rotated coordinate system.
         // distance between camera and screen depending on field of view
         float ScreenDistance;
-        const int FrameHeight;
+        // used to compute screen distance
+        const int ScreenHeight;
 
     public:
         Camera(uint32_t frameHeight = 512, float fieldOfView = M_PI / 3.f, const Vec3f &position = Vec3f(0,0,0))
-            : FrameHeight(frameHeight)
+            : ScreenHeight(frameHeight)
         {
             Position = position;
             Direction = Vec3f(0,0,-1);
@@ -39,7 +40,7 @@ private:
         }
         void SetFieldOfView(float fieldOfView)
         {
-            ScreenDistance = FrameHeight / (2.f * tan(fieldOfView / 2.f));
+            ScreenDistance = ScreenHeight / (2.f * tan(fieldOfView / 2.f));
         }
         void RotateX(float angle)
         {

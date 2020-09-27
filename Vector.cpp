@@ -13,6 +13,13 @@ const float& Vec3f::operator[](const size_t i) const
 {
     assert(i < 3); return i <= 0 ? X : (1 == i ? Y : Z);
 }
+Vec3f& Vec3f::operator+=(const Vec3f &v)
+{
+    X += v.X;
+    Y += v.Y;
+    Z += v.Z;
+    return *this;
+}
 float Vec3f::Norm() const
 {
     return sqrtf(X*X + Y*Y + Z*Z);
