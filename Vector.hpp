@@ -13,8 +13,11 @@ struct Vec3f
     float Norm() const;
     Vec3f& Normalize();
     void RotateX(float angle);
+    void RotateX(float sinA, float cosA);
     void RotateY(float angle);
+    void RotateY(float sinA, float cosA);
     void RotateZ(float angle);
+    void RotateZ(float sinA, float cosA);
     void RotateAxisMatrix(const Vec3f &axis, float angle);
     void RotateAxisQuaternion(const Vec3f &axis, float angle);
 };

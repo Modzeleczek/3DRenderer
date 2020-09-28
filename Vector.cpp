@@ -29,21 +29,24 @@ Vec3f& Vec3f::Normalize()
     *this = (*this) * (1.f / Norm());
     return *this;
 }
-void Vec3f::RotateX(float angle)
+void Vec3f::RotateX(float angle) { RotateX(sin(angle), cos(angle)); }
+void Vec3f::RotateX(float sinA, float cosA)
 {
-    const float y = Y, z = Z, sinA = sin(angle), cosA = cos(angle);
+    const float y = Y, z = Z;
     Y = y * cosA - z * sinA;
     Z = y * sinA + z * cosA;
 }
-void Vec3f::RotateY(float angle)
+void Vec3f::RotateY(float angle) { RotateY(sin(angle), cos(angle)); }
+void Vec3f::RotateY(float sinA, float cosA)
 {
-    const float x = X, z = Z, sinA = sin(angle), cosA = cos(angle);
+    const float x = X, z = Z;
     X = x * cosA + z * sinA;
     Z = -x * sinA + z * cosA;
 }
-void Vec3f::RotateZ(float angle)
+void Vec3f::RotateZ(float angle) { RotateZ(sin(angle), cos(angle)); }
+void Vec3f::RotateZ(float sinA, float cosA)
 {
-    const float x = X, y = Y, sinA = sin(angle), cosA = cos(angle);
+    const float x = X, y = Y;
     X = x * cosA - y * sinA;
     Y = x * sinA + y * cosA;   
 }

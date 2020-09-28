@@ -98,28 +98,14 @@ private:
             float x, y, z;
 
             // rotate HorizontalAxis around the X axis
-            y = HorizontalAxis.Y;
-            z = HorizontalAxis.Z;
-            HorizontalAxis.Y = y * cosA_and_cosB - z * sinA;
-            HorizontalAxis.Z = y * sinA + z * cosA_and_cosB;
-
-            x = HorizontalAxis.X;
-            z = HorizontalAxis.Z;
+            HorizontalAxis.RotateX(sinA, cosA_and_cosB);
             // rotate HorizontalAxis around the Y axis
-            HorizontalAxis.X = x * cosA_and_cosB + z * sinB;
-            HorizontalAxis.Z = -x * sinB + z * cosA_and_cosB;
+            HorizontalAxis.RotateY(sinB, cosA_and_cosB);
 
             // rotate VerticalAxis around the X axis
-            y = VerticalAxis.Y;
-            z = VerticalAxis.Z;
-            VerticalAxis.Y = y * cosA_and_cosB - z * sinA;
-            VerticalAxis.Z = y * sinA + z * cosA_and_cosB;
-
-            x = VerticalAxis.X;
-            z = VerticalAxis.Z;
+            VerticalAxis.RotateX(sinA, cosA_and_cosB);
             // rotate VerticalAxis around the Y axis
-            VerticalAxis.X = x * cosA_and_cosB + z * sinB;
-            VerticalAxis.Z = -x * sinB + z * cosA_and_cosB;
+            VerticalAxis.RotateY(sinB, cosA_and_cosB);
             
             Direction = direction;
         }
