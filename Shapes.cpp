@@ -68,7 +68,7 @@ struct Circle : PlainShape
     {
         distance = ( Direction*(Center - origin) ) / (Direction*direction);
         if(distance <= 0) return false;
-        return (origin + distance*direction - Center).Norm() <= Radius;
+        return ((origin + (distance*direction)) - Center).Norm() <= Radius;
     }
 };
 
@@ -90,15 +90,62 @@ struct Rectangle : public PlainShape
 
     Rectangle(const Vec3f &center, const float width, const float height,
         const Vec3f &direction, const Vec3b &color)
-        : PlainShape(center, direction, color), Width(width), Height(height) {}
+        : PlainShape(center, direction, color), Width(width), Height(height)
+    { RotateAxes(); }
 
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
     {
-        distance = ( Vec3f(0,0,1)*(Center - origin) ) / (Vec3f(0,0,1)*direction);
+        distance = ( Direction*(Center - origin) ) / (Direction*direction);
         if(distance <= 0) return false;
         Vec3f p = origin + distance*direction;
-        return (p.X >= Center.X - Width && p.X < Center.X + Width &&
-                p.Y >= Center.Y - Height && p.Y < Center.Y + Height);
+
+        /* return true if:
+        1) projection of fromCenterToP = p - Center onto 'HorizontalAxis' has norm less than 'Width' / 2 and
+        2) projection of fromCenterToP onto VerticalAxis has norm less than Height / 2
+
+        1) cos(HorizontalAxis, fromCenterToP) = (fromCenterToP * HorizontalAxis) / (fromCenterToP.Norm() * 1)
+        cos(HorizontalAxis, fromCenterToP) = horizontalDistance / fromCenterToP.Norm()
+        horizontalDistance = cos(HorizontalAxis, fromCenterToP) * fromCenterToP.Norm() =
+        (fromCenterToP * HorizontalAxis) / (fromCenterToP.Norm() * 1) * fromCenterToP.Norm() =
+        fromCenterToP * HorizontalAxis
+        horizontalDistance is the norm of the projection of fromCenterToP onto HorizontalAxis
+
+        2) verticalDistance = odleglosc * VerticalAxis
+        verticalDistance is the norm of the projection of fromCenterToP onto VerticalAxis */
+        
+        Vec3f fromCenterToP = p - Center;
+        /* the norm of the projection (horizontal or vertical distance) is:
+        - negative if the p point is to the left from the Center point on the rectangle
+        - positive if the p point is to the right from the Center point on the rectangle
+        - equal to 0 if the p point is equal to the Center point */
+        const float horizontalLength = fromCenterToP * HorizontalAxis,
+                    verticalLength = fromCenterToP * VerticalAxis;
+        return(horizontalLength <= Width / 2.f && horizontalLength >= -Width / 2.f &&
+            verticalLength <= Height / 2.f && verticalLength >= -Height / 2.f);
+    }
+
+    void SetDirection(const Vec3f &direction)
+    {
+        Direction = direction;
+        RotateAxes();
+    }
+
+private:
+    Vec3f HorizontalAxis, VerticalAxis;
+    void RotateAxes()
+    {
+        const float cosA_and_cosB = Direction.Z,
+                    sinB = Direction.X,
+                    sinA = Direction.Y;
+
+        HorizontalAxis = Vec3f(1,0,0);
+        VerticalAxis = Vec3f(0,1,0);
+
+        HorizontalAxis.RotateX(sinA, cosA_and_cosB);
+        HorizontalAxis.RotateY(sinB, cosA_and_cosB);
+
+        VerticalAxis.RotateX(sinA, cosA_and_cosB);
+        VerticalAxis.RotateY(sinB, cosA_and_cosB);
     }
 };
 

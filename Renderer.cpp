@@ -141,7 +141,7 @@ private:
     {
         byte i, closestIndex = 0;
         float closestShapeDistance = MAXFLOAT, distance;
-        for(i = 1; i < Shapes.size(); ++i)
+        for(i = 0; i < Shapes.size(); ++i)
         {
             if(Shapes[i]->RayIntersect(Eye.Position, direction, distance) &&
             distance < closestShapeDistance)
