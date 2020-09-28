@@ -73,40 +73,30 @@ private:
         void SetDirection(const Vec3f &direction)
         {
             /*
-            Algorytm:
-            - wyznacz kąt a, o jaki trzeba obrócić wektor (0,0,1) wokół osi X i kąt b, o jaki trzeba obrócić wektor (0,0,1) wokół osi Y, aby otrzymać direction
-            - ustaw: HorizontalAxis na domyślną wartość (1,0,0), VerticalAxis na domyślną wartość (0,1,0)
-            - obróć HorizontalAxis i VerticalAxis o kąty a, b odpowiednio wokół osi X, Y
-            - wpisz direction do Direction
-            
-            cosB = direction.Z / 1
-            sinB = direction.X / 1
-            cosA = direction.Z / 1
-            sinA = direction.Y / 1
+            Algorithm:
+            1. compute the angles a and b, by which we need to consecutively rotate the vector (0,0,1) around the X and Y axes in order to get 'direction'
+            2. assign: 'HorizontalAxis' to its default value (1,0,0) and 'VerticalAxis' to its default value (0,1,0)
+            3. rotate 'HorizontalAxis' and 'VerticalAxis' by the angles a and b around axes X and Y, respectively
+            4. assign 'Direction' to 'direction'
             */
 
+            // 1
             const float cosA_and_cosB = direction.Z,
                         sinB = direction.X,
                         sinA = direction.Y;
 
-            // set HorizontalAxis to (1,0,0)
+            // 2
             HorizontalAxis = Vec3f(1,0,0);
-            // set VerticalAxis to (0,1,0)
             VerticalAxis = Vec3f(0,1,0);
 
-            // vector's coordinates before rotation
-            float x, y, z;
-
-            // rotate HorizontalAxis around the X axis
+            // 3
             HorizontalAxis.RotateX(sinA, cosA_and_cosB);
-            // rotate HorizontalAxis around the Y axis
             HorizontalAxis.RotateY(sinB, cosA_and_cosB);
 
-            // rotate VerticalAxis around the X axis
             VerticalAxis.RotateX(sinA, cosA_and_cosB);
-            // rotate VerticalAxis around the Y axis
             VerticalAxis.RotateY(sinB, cosA_and_cosB);
             
+            // 4
             Direction = direction;
         }
     };
