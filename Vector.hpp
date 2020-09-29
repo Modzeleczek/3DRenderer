@@ -6,29 +6,29 @@
 struct Vec3f
 {
     float X, Y, Z;
-    Vec3f(float x = 0, float y = 0, float z = 0);
+    Vec3f(const float x = 0, const float y = 0, const float z = 0);
     float& operator[](const size_t i);
     const float& operator[](const size_t i) const;
     Vec3f& operator+=(const Vec3f &v);
+    static Vec3f Cross(const Vec3f &v1, const Vec3f &v2); // cross product
     float Norm() const;
     Vec3f& Normalize();
-    void RotateX(float angle);
-    void RotateX(float sinA, float cosA);
-    void RotateY(float angle);
-    void RotateY(float sinA, float cosA);
-    void RotateZ(float angle);
-    void RotateZ(float sinA, float cosA);
-    void RotateAxisMatrix(const Vec3f &axis, float angle);
-    void RotateAxisQuaternion(const Vec3f &axis, float angle);
+    void RotateX(const float angle);
+    void RotateX(const float sinA, const float cosA);
+    void RotateY(const float angle);
+    void RotateY(const float sinA, const float cosA);
+    void RotateZ(const float angle);
+    void RotateZ(const float sinA, const float cosA);
+    void RotateAxisMatrix(const Vec3f &axis, const float angle);
+    void RotateAxisQuaternion(const Vec3f &axis, const float angle);
 };
 
 float operator*(const Vec3f &v1, const Vec3f &v2); // dot product
 Vec3f operator+(Vec3f v1, const Vec3f &v2);
 Vec3f operator-(Vec3f v1, const Vec3f &v2);
-Vec3f operator*(const Vec3f &v, float factor);
-Vec3f operator*(float factor, const Vec3f &v);
+Vec3f operator*(const Vec3f &v, const float factor);
+Vec3f operator*(const float factor, const Vec3f &v);
 Vec3f operator-(const Vec3f &v);
-Vec3f Cross(const Vec3f &v1, const Vec3f &v2); // cross product
 std::ostream& operator<<(std::ostream &out, const Vec3f &v);
 
 
@@ -36,7 +36,7 @@ typedef uint8_t byte;
 struct Vec3b
 {
     byte R, G, B;
-    Vec3b(byte r = 0, byte g = 0, byte b = 0);
+    Vec3b(const byte r = 0, const byte g = 0, const byte b = 0);
     byte& operator[](const size_t i);
     const byte& operator[](const size_t i) const;
 };

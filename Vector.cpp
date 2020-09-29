@@ -3,7 +3,7 @@
 #include <cmath>
 #include <cassert>
 
-Vec3f::Vec3f(float x, float y, float z) : X(x), Y(y), Z(z) { }
+Vec3f::Vec3f(const float x, const float y, const float z) : X(x), Y(y), Z(z) {}
 
 float& Vec3f::operator[](const size_t i)
 {
@@ -20,6 +20,10 @@ Vec3f& Vec3f::operator+=(const Vec3f &v)
     Z += v.Z;
     return *this;
 }
+Vec3f Vec3f::Cross(const Vec3f &v1, const Vec3f &v2)
+{
+    return Vec3f(v1.Y*v2.Z - v1.Z*v2.Y, v1.Z*v2.X - v1.X*v2.Z, v1.X*v2.Y - v1.Y*v2.X);
+}
 float Vec3f::Norm() const
 {
     return sqrtf(X*X + Y*Y + Z*Z);
@@ -29,28 +33,28 @@ Vec3f& Vec3f::Normalize()
     *this = (*this) * (1.f / Norm());
     return *this;
 }
-void Vec3f::RotateX(float angle) { RotateX(sin(angle), cos(angle)); }
-void Vec3f::RotateX(float sinA, float cosA)
+void Vec3f::RotateX(const float angle) { RotateX(sin(angle), cos(angle)); }
+void Vec3f::RotateX(const float sinA, const float cosA)
 {
     const float y = Y, z = Z;
     Y = y * cosA - z * sinA;
     Z = y * sinA + z * cosA;
 }
-void Vec3f::RotateY(float angle) { RotateY(sin(angle), cos(angle)); }
-void Vec3f::RotateY(float sinA, float cosA)
+void Vec3f::RotateY(const float angle) { RotateY(sin(angle), cos(angle)); }
+void Vec3f::RotateY(const float sinA, const float cosA)
 {
     const float x = X, z = Z;
     X = x * cosA + z * sinA;
     Z = -x * sinA + z * cosA;
 }
-void Vec3f::RotateZ(float angle) { RotateZ(sin(angle), cos(angle)); }
-void Vec3f::RotateZ(float sinA, float cosA)
+void Vec3f::RotateZ(const float angle) { RotateZ(sin(angle), cos(angle)); }
+void Vec3f::RotateZ(const float sinA, const float cosA)
 {
     const float x = X, y = Y;
     X = x * cosA - y * sinA;
     Y = x * sinA + y * cosA;   
 }
-void Vec3f::RotateAxisMatrix(const Vec3f &axis, float angle)
+void Vec3f::RotateAxisMatrix(const Vec3f &axis, const float angle)
 {
     // https://www.continuummechanics.org/rotationmatrix.html
     float vx = X, vy = Y, vz = Z, c = cos(angle), s = sin(angle);
@@ -58,7 +62,7 @@ void Vec3f::RotateAxisMatrix(const Vec3f &axis, float angle)
     Y = ((1 - c)*axis.X*axis.Y + s*axis.Z)*vx +	(c + (1 - c)*axis.Y*axis.Y)*vy +		((1 - c)*axis.Y*axis.Z - s*axis.X)*vz;
 	Z = ((1 - c)*axis.X*axis.Z - s*axis.Y)*vx +	((1 - c)*axis.Y*axis.Z + s*axis.X)*vy +	(c + (1 - c)*axis.Z*axis.Z)*vz;
 }
-void Vec3f::RotateAxisQuaternion(const Vec3f &axis, float angle)
+void Vec3f::RotateAxisQuaternion(const Vec3f &axis, const float angle)
 {
     // https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
     // q = cos(angle/2) + (axis.x*i + axis.y*j + axis.z*k)*sin(angle/2)
@@ -92,12 +96,12 @@ Vec3f operator-(Vec3f v1, const Vec3f &v2)
     return v1;
 }
 
-Vec3f operator*(const Vec3f &v, float factor)
+Vec3f operator*(const Vec3f &v, const float factor)
 {
     return Vec3f(v.X * factor, v.Y * factor, v.Z * factor);
 }
 
-Vec3f operator*(float factor, const Vec3f &v)
+Vec3f operator*(const float factor, const Vec3f &v)
 {
     return v * factor;
 }
@@ -107,11 +111,6 @@ Vec3f operator-(const Vec3f &v)
     return v * -1.f;
 }
 
-Vec3f Cross(const Vec3f &v1, const Vec3f &v2)
-{
-    return Vec3f(v1.Y*v2.Z - v1.Z*v2.Y, v1.Z*v2.X - v1.X*v2.Z, v1.X*v2.Y - v1.Y*v2.X);
-}
-
 std::ostream& operator<<(std::ostream &out, const Vec3f &v)
 {
     out << v.X << ' ' << v.Y << ' ' << v.Z;
@@ -119,7 +118,7 @@ std::ostream& operator<<(std::ostream &out, const Vec3f &v)
 }
 
 
-Vec3b::Vec3b(byte r, byte g, byte b) : R(r), G(g), B(b) { }
+Vec3b::Vec3b(const byte r, const byte g, const byte b) : R(r), G(g), B(b) {}
 
 byte& Vec3b::operator[](const size_t i)
 {
