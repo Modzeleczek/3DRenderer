@@ -132,10 +132,22 @@ struct Plane : public PlainShape
     Plane(const Vec3f &center, const Vec3f &direction, const Material &material)
         : PlainShape(center, direction, material) {}
 
-    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
+    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance, 
+        Vec3f &hitPoint, Vec3f &normal) const override
     {
-        distance = ( Direction*(Center - origin) ) / (Direction*direction);
-        return distance > 0;
+        const float cosDd = Direction*direction;
+        if(cosDd == 0) return false; // the ray does not hit the plane, because they are parallel
+        distance = ( Direction*(Center - origin) ) / cosDd;
+        if(distance > 0)
+        {
+            hitPoint = origin + distance * direction;
+            if(cosDd < 0) // the ray comes from the side of the plane that is pointed by its Direction vector
+                normal = Direction;
+            else // the ray comes from the other side of the plane
+                normal = -Direction;
+            return true;
+        }
+        return false;
     }
 };
 
