@@ -28,7 +28,8 @@ struct Shape
     Vec3f Center;
     Material _material;
     Shape(const Vec3f &center, const Material &material) : Center(center), _material(material) {}
-    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const = 0;
+    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance, Vec3f &hitPoint, Vec3f &normal)
+        const = 0;
 };
 
 struct Sphere : public Shape
@@ -38,7 +39,8 @@ struct Sphere : public Shape
     Sphere(const Vec3f &center, const float radius, const Material &material)
         : Shape(center, material), Radius(radius) {}
 
-    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
+    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance, 
+        Vec3f &hitPoint, Vec3f &normal) const override
     {
         Vec3f L = Center - origin;
         float tca = L*direction;
@@ -46,9 +48,28 @@ struct Sphere : public Shape
         if (d2 > Radius*Radius) return false;
         float thc = sqrtf(Radius*Radius - d2);
         distance = tca - thc;// thc jest zawsze nieujemne, więc tca - thc jest zawsze mniejsze od tca + thc
-        if(distance > 0) return true;
+        if(distance > 0)
+        {
+            hitPoint = origin + distance * direction;
+            // if(L.Norm() >= Radius)
+            if(L*L >= Radius*Radius)
+                normal = (hitPoint - Center).Normalize();
+            else
+                normal = (Center - hitPoint).Normalize();
+            return true;
+        }
         distance = tca + thc;
-        return distance > 0;
+        if(distance > 0)
+        {
+            hitPoint = origin + distance * direction;
+            // if(L.Norm() >= Radius)
+            if(L*L >= Radius*Radius)
+                normal = (hitPoint - Center).Normalize();
+            else
+                normal = (Center - hitPoint).Normalize();
+            return true;
+        }
+        return false;
     }
 };
 
