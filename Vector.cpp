@@ -33,6 +33,25 @@ Vec3f& Vec3f::Normalize()
     *this = (*this) * (1.f / Norm());
     return *this;
 }
+Vec3f reflect(const Vec3f &I, const Vec3f &N)
+{
+    /* Rotation of I vector by 180 degrees around N vector using quaternion.
+    qr = cos(180/2) = 0, s = sin(180/2) = 1
+    qxyz = (N.X * 1, N.Y * 1, N.Z * 1) = N
+    |N| = |I| = 1
+    I' = 2.0f * (N*I) * N + (0 - (N*N)) * I = 2.0f * (N*I) * N + (0 - (1^2)) * I = 2.0f * (N*I) * N - I 
+    The rotated I' vector is still pointing at the point, where the ray hit, so it has to be inversed in order to be fully reflected.
+    result - -I' = I - 2.0f * (N*I) * N */
+    return I - N*2.f*(I*N);
+}
+Vec3f refract(const Vec3f &I, const Vec3f &N, const float eta_t, const float eta_i=1.f)
+{ // Snell's law
+    float cosi = - std::max(-1.f, std::min(1.f, I*N));
+    if (cosi<0) return refract(I, -N, eta_i, eta_t); // if the ray comes from the inside the object, swap the air and the media
+    float eta = eta_i / eta_t;
+    float k = 1 - eta*eta*(1 - cosi*cosi);
+    return k<0 ? Vec3f(1,0,0) : I*eta + N*(eta*cosi - sqrtf(k)); // k<0 = total reflection, no ray to refract. I refract it anyways, this has no physical meaning
+}
 void Vec3f::RotateX(const float angle) { RotateX(sin(angle), cos(angle)); }
 void Vec3f::RotateX(const float sinA, const float cosA)
 {
@@ -73,6 +92,10 @@ void Vec3f::RotateAxisQuaternion(const Vec3f &axis, const float angle)
     *this = 2.0f * (qxyz*(*this)) * qxyz
           + (qr*qr - (qxyz*qxyz)) * (*this)
           + 2.0f * qr * Cross(qxyz, *this);
+}
+Vec3f::operator Vec3b()
+{
+    return Vec3b(255 * X, 255 * Y, 255 * Z);
 }
 
 float operator*(const Vec3f &v1, const Vec3f &v2)
@@ -127,4 +150,16 @@ byte& Vec3b::operator[](const size_t i)
 const byte& Vec3b::operator[](const size_t i) const
 {
     assert(i < 3); return i <= 0 ? R : (1 == i ? G : B);
+}
+
+
+Vec4f::Vec4f(const float x, const float y, const float z, const float w) : X(x), Y(y), Z(z), W(w) {}
+
+float& Vec4f::operator[](const size_t i)
+{
+    assert(i < 4); return i <= 0 ? X : (1 == i ? Y : (2 == i ? Z : W));
+}
+const float& Vec4f::operator[](const size_t i) const
+{
+    assert(i < 4); return i <= 0 ? X : (1 == i ? Y : (2 == i ? Z : W));
 }
