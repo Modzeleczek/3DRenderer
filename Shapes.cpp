@@ -80,7 +80,8 @@ struct Cube : Shape
     Cube(const Vec3f &center, const float edge, const Material &material)
         : Shape(center, material), Edge(edge) {}
     
-    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
+    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance, 
+        Vec3f &hitPoint, Vec3f &normal) const override
     {
         return false;
     }
