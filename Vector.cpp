@@ -44,7 +44,7 @@ Vec3f reflect(const Vec3f &I, const Vec3f &N)
     result - -I' = I - 2.0f * (N*I) * N */
     return I - N*2.f*(I*N);
 }
-Vec3f refract(const Vec3f &I, const Vec3f &N, const float eta_t, const float eta_i=1.f)
+Vec3f refract(const Vec3f &I, const Vec3f &N, const float eta_t, const float eta_i)
 { // Snell's law
     float cosi = - std::max(-1.f, std::min(1.f, I*N));
     if (cosi<0) return refract(I, -N, eta_i, eta_t); // if the ray comes from the inside the object, swap the air and the media
