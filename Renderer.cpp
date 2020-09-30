@@ -152,7 +152,7 @@ private:
         Vec3f normal, hitPoint;
         for(i = 0; i < Shapes.size(); ++i)
         {
-            if(Shapes[i]->RayIntersect(orig, direction, distance, hitPoint, normal) &&
+            if(Shapes[i]->RayIntersect(orig, dir, distance, hitPoint, normal) &&
                 distance < closestShapeDistance)
             {
                 closestShapeDistance = distance;
