@@ -105,6 +105,7 @@ public:
     const int Width, Height;
     byte *const FrameBuffer;
     std::vector<Shape*> Shapes;
+    std::vector<Light*> Lights;
     Camera Eye;
 
     Renderer(uint32_t frameWidth = 512, uint32_t frameHeight = 512)
@@ -118,6 +119,9 @@ public:
         for(size_t i = 0; i < Shapes.size(); ++i)
             if(Shapes[i])
                 delete Shapes[i];
+        for(size_t i = 0; i < Lights.size(); ++i)
+            if(Lights[i])
+                delete Lights[i];
     }
 
     void RenderFrame()
@@ -128,8 +132,11 @@ public:
         {
             for(x = -Width / 2; x < Width / 2; ++x) // going from left
             {
-                CastRay(Eye.GetScreenPixelPosition(x, y).Normalize(), p);
-                p += 4;
+                Vec3b color = static_cast<Vec3b>(cast_ray(Eye.Position, Eye.GetScreenPixelPosition(x, y).Normalize()));
+                *p = color.R; ++p;
+                *p = color.G; ++p;
+                *p = color.B; ++p;
+                ++p;
                 // Adding 4, because every pixel is coded by four bytes. The fourth byte is 
                 // alpha value, which is ignored by GifWriter.
             }
@@ -137,31 +144,63 @@ public:
     }
 
 private:
-    void CastRay(const Vec3f &direction, byte *pixelPointer)
+    bool scene_intersect(const Vec3f &orig, const Vec3f &dir, Vec3f &closestShapeHitPoint, 
+        Vec3f &closestShapeNormal, Material &material)
     {
-        byte i, closestIndex = 0;
+        byte i;
         float closestShapeDistance = MAXFLOAT, distance;
+        Vec3f normal, hitPoint;
         for(i = 0; i < Shapes.size(); ++i)
         {
-            if(Shapes[i]->RayIntersect(Eye.Position, direction, distance) &&
-            distance < closestShapeDistance)
+            if(Shapes[i]->RayIntersect(orig, direction, distance, hitPoint, normal) &&
+                distance < closestShapeDistance)
             {
                 closestShapeDistance = distance;
-                closestIndex = i;
+                closestShapeHitPoint = hitPoint;
+                closestShapeNormal = normal;
+                material = Shapes[i]->_material;
             }
         }
-        if(closestShapeDistance < 1000)
+        return closestShapeDistance < 1000;
+    }
+
+    Vec3f cast_ray(const Vec3f &orig, const Vec3f &dir, const byte depth = 0)
+    {
+        Vec3f point, N;
+        Material material;
+
+        if (depth>4 || !scene_intersect(orig, dir, point, N, material))
+            return Vec3f(0.2f, 0.7f, 0.8f); // background color
+
+        Vec3f reflect_dir = reflect(dir, N).Normalize();
+        Vec3f refract_dir = refract(dir, N, material.refractive_index).Normalize();
+        // Vec3f reflect_orig = reflect_dir*N < 0 ? point - N*1e-3 : point + N*1e-3; // offset the original point to avoid occlusion by the object itself
+        Vec3f reflect_orig = point + N*1e-3;
+        // Vec3f refract_orig = refract_dir*N < 0 ? point - N*1e-3 : point + N*1e-3;
+        Vec3f refract_orig = point - N*1e-3;
+        Vec3f reflect_color = cast_ray(reflect_orig, reflect_dir, depth + 1);
+        Vec3f refract_color = cast_ray(refract_orig, refract_dir, depth + 1);
+
+        float diffuse_light_intensity = 0, specular_light_intensity = 0;
+        for (size_t i=0; i < Lights.size(); i++)
         {
-            *(pixelPointer++) = Shapes[closestIndex]->Color.R;
-            *(pixelPointer++) = Shapes[closestIndex]->Color.G;
-            *(pixelPointer++) = Shapes[closestIndex]->Color.B;
+            Vec3f light_dir      = (Lights[i]->position - point).Normalize();
+            float light_distance = (Lights[i]->position - point).Norm();
+
+            Vec3f shadow_orig = light_dir*N < 0 ? point - N*1e-3 : point + N*1e-3; // checking if the point lies in the shadow of the Lights[i]
+            Vec3f shadow_pt, shadow_N;
+            Material tmpmaterial;
+            if (scene_intersect(shadow_orig, light_dir, shadow_pt, shadow_N, tmpmaterial) 
+                && (shadow_pt-shadow_orig).Norm() < light_distance)
+                continue;
+
+            diffuse_light_intensity  += Lights[i]->intensity * std::max(0.f, light_dir*N);
+            specular_light_intensity += powf(std::max(0.f, -reflect(-light_dir, N)*dir), 
+                                             material.specular_exponent)*Lights[i]->intensity;
         }
-        else
-        {
-            // background color Vec3b(0,0,0)
-            for(i = 0; i < 3; ++i)
-                *(pixelPointer++) = 0;
-        }
+        return material.diffuse_color * diffuse_light_intensity * material.albedo[0] +
+            Vec3f(1.f, 1.f, 1.f)*specular_light_intensity * material.albedo[1] +
+            reflect_color*material.albedo[2] + refract_color*material.albedo[3];
     }
 };
 #endif // RENDERER_CPP
