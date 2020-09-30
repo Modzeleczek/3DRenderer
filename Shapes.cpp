@@ -241,12 +241,23 @@ struct Ellipse : public PlainShape
         : PlainShape(center1, direction, material), Focus2(center2),
         FocusDistanceSum((center1 - center2).Norm() + additionalFocusesDistance) {}
 
-    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
+    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance, 
+        Vec3f &hitPoint, Vec3f &normal) const override
     {
-        distance = ( Direction*(Center - origin) ) / (Direction*direction);
+        const float cosDd = Direction*direction;
+        if(cosDd == 0) return false; // the ray does not hit the ellipse, because they are parallel
+        distance = ( Direction*(Center - origin) ) / cosDd;
         if(distance <= 0) return false;
-        Vec3f p = origin + distance*direction;
-        return ((p - Center).Norm() + (p - Focus2).Norm() <= FocusDistanceSum);
+        hitPoint = origin + distance * direction;
+        if((hitPoint - Center).Norm() + (hitPoint - Focus2).Norm() <= FocusDistanceSum)
+        {
+            if(cosDd < 0) // the ray comes from the side of the ellipse that is pointed by its Direction vector
+                normal = Direction;
+            else // the ray comes from the other side of the ellipse
+                normal = -Direction;
+            return true;
+        }
+        return false;
     }
 };
 #endif // SHAPES_CPP
