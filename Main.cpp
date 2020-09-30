@@ -16,21 +16,27 @@ int main()
     const uint32_t delay = 5;
 	GifBegin(&writer, "output.gif", renderer.Width, renderer.Height, delay);
 
+    // predefined materials
+    Material      ivory(1.0, Vec4f(0.6,  0.3, 0.1, 0.0), Vec3f(0.4, 0.4, 0.3),   50.);
+    Material      glass(1.5, Vec4f(0.0,  0.5, 0.1, 0.8), Vec3f(0.6, 0.7, 0.8),  125.);
+    Material red_rubber(1.0, Vec4f(0.9,  0.1, 0.0, 0.0), Vec3f(0.3, 0.1, 0.1),   10.);
+    Material     mirror(1.0, Vec4f(0.0, 10.0, 0.8, 0.0), Vec3f(1.0, 1.0, 1.0), 1425.);
+
     srand(time(0));
     renderer.Shapes.push_back(new Circle(Vec3f(-2,0,-10), 0.5, Vec3f(0,1,1).Normalize(), 
-        Vec3b(255,255,255))); // white
+        ivory));
     renderer.Shapes.push_back(new Plane(Vec3f(-6,0,-20), Vec3f(1,0,0).Normalize(), 
-        Vec3b(255,0,0))); // red
+        glass));
     renderer.Shapes.push_back(new Plane(Vec3f(5,0,-15), Vec3f(0,0,1).Normalize(), 
-        Vec3b(0,255,0))); // green
+        red_rubber));
     renderer.Shapes.push_back(new Plane(Vec3f(0,-4,0), Vec3f(0,1,0).Normalize(), 
-        Vec3b(0,0,255))); // blue
+        mirror));
     renderer.Shapes.push_back(new Rectangle(Vec3f(0,0,-10), 0.5, 0.5, Vec3f(1,1,1).Normalize(), 
-        Vec3b(128,128,128))); // gray
+        ivory));
     renderer.Shapes.push_back(new Sphere(Vec3f(2,0,-10), 0.5, 
-        Vec3b(255,0,255))); // pink
+        glass));
     renderer.Shapes.push_back(new Ellipse(Vec3f(4,0,-10), Vec3f(6,0,-10), 1, Vec3f(0,0,1).Normalize(), 
-        Vec3b(0,255,255))); // aqua
+        red_rubber));
 
     // Negative angle rotates clockwise.
     //renderer.Eye.RotateY(-M_PI / 2);
