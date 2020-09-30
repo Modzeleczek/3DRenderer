@@ -4,11 +4,30 @@
 #include "Vector.hpp"
 #include <cmath>
 
+struct Light
+{
+    Vec3f position;
+    float intensity;
+
+    Light(const Vec3f &p, const float i) : position(p), intensity(i) {}
+};
+
+struct Material
+{
+    float refractive_index;
+    Vec4f albedo;
+    Vec3f diffuse_color;
+    float specular_exponent;
+
+    Material(const float r, const Vec4f &a, const Vec3f &color, const float spec) : refractive_index(r), albedo(a), diffuse_color(color), specular_exponent(spec) {}
+    Material() : refractive_index(1), albedo(1,0,0,0), diffuse_color(), specular_exponent() {}
+};
+
 struct Shape
 {
     Vec3f Center;
-    Vec3b Color;
-    Shape(const Vec3f &center, const Vec3b &color) : Center(center), Color(color) {}
+    Material _material;
+    Shape(const Vec3f &center, const Material &material) : Center(center), _material(material) {}
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const = 0;
 };
 
@@ -16,8 +35,8 @@ struct Sphere : public Shape
 {
     float Radius;
 
-    Sphere(const Vec3f &center, const float radius, const Vec3b &color)
-        : Shape(center, color), Radius(radius) {}
+    Sphere(const Vec3f &center, const float radius, const Material &material)
+        : Shape(center, material), Radius(radius) {}
 
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
     {
@@ -37,8 +56,8 @@ struct Cube : Shape
 {
     float Edge;
 
-    Cube(const Vec3f &center, const float edge, const Vec3b &color)
-        : Shape(center, color), Edge(edge) {}
+    Cube(const Vec3f &center, const float edge, const Material &material)
+        : Shape(center, material), Edge(edge) {}
     
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
     {
@@ -51,8 +70,8 @@ struct PlainShape : Shape
 protected:
     Vec3f Direction;
 public:
-    PlainShape(const Vec3f &center, const Vec3f &normal, const Vec3b &color)
-        : Shape(center, color), Direction(normal) {}
+    PlainShape(const Vec3f &center, const Vec3f &normal, const Material &material)
+        : Shape(center, material), Direction(normal) {}
     virtual void SetDirection(const Vec3f &direction) { Direction = direction; }
 };
 
@@ -61,8 +80,8 @@ struct Circle : PlainShape
     float Radius;
 
     Circle(const Vec3f &center, const float radius, const Vec3f &direction,
-    const Vec3b &color)
-        : PlainShape(center, direction, color), Radius(radius) {}
+    const Material &material)
+        : PlainShape(center, direction, material), Radius(radius) {}
 
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
     {
@@ -74,8 +93,8 @@ struct Circle : PlainShape
 
 struct Plane : public PlainShape
 {
-    Plane(const Vec3f &center, const Vec3f &direction, const Vec3b &color)
-        : PlainShape(center, direction, color) {}
+    Plane(const Vec3f &center, const Vec3f &direction, const Material &material)
+        : PlainShape(center, direction, material) {}
 
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
     {
@@ -89,8 +108,8 @@ struct Rectangle : public PlainShape
     float Width, Height;
 
     Rectangle(const Vec3f &center, const float width, const float height,
-        const Vec3f &direction, const Vec3b &color)
-        : PlainShape(center, direction, color), Width(width), Height(height)
+        const Vec3f &direction, const Material &material)
+        : PlainShape(center, direction, material), Width(width), Height(height)
     { RotateAxes(); }
 
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
@@ -159,8 +178,8 @@ struct Ellipse : public PlainShape
     between focuses, so the ellipse does not exist */
 
     Ellipse(const Vec3f &center1, const Vec3f &center2, const float additionalFocusesDistance,
-    const Vec3f &direction, const Vec3b &color)
-        : PlainShape(center1, direction, color), Focus2(center2),
+    const Vec3f &direction, const Material &material)
+        : PlainShape(center1, direction, material), Focus2(center2),
         FocusDistanceSum((center1 - center2).Norm() + additionalFocusesDistance) {}
 
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
