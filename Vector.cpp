@@ -93,7 +93,7 @@ void Vec3f::RotateAxisQuaternion(const Vec3f &axis, const float angle)
           + (qr*qr - (qxyz*qxyz)) * (*this)
           + 2.0f * qr * Cross(qxyz, *this);
 }
-Vec3f::operator Vec3b()
+Vec3f::operator Vec3b() const
 {
     return Vec3b(255 * X, 255 * Y, 255 * Z);
 }
