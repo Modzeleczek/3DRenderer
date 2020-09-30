@@ -105,11 +105,25 @@ struct Circle : PlainShape
     const Material &material)
         : PlainShape(center, direction, material), Radius(radius) {}
 
-    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
+    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance, 
+        Vec3f &hitPoint, Vec3f &normal) const override
     {
-        distance = ( Direction*(Center - origin) ) / (Direction*direction);
+        const float cosDd = Direction*direction;
+        if(cosDd == 0) return false; // the ray does not hit the circle, because they are parallel
+        distance = ( Direction*(Center - origin) ) / cosDd;
         if(distance <= 0) return false;
-        return ((origin + (distance*direction)) - Center).Norm() <= Radius;
+        hitPoint = origin + distance * direction;
+        // (hitPoint - Center).Norm() <= Radius
+        const Vec3f fromCenterToP = hitPoint - Center;
+        if(fromCenterToP*fromCenterToP <= Radius*Radius))
+        {
+            if(cosDd < 0) // the ray comes from the side of the circle that is pointed by its Direction vector
+                normal = Direction;
+            else // the ray comes from the other side of the circle
+                normal = -Direction;
+            return true;
+        }
+        return false;
     }
 };
 
