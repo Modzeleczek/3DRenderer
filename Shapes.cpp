@@ -115,7 +115,7 @@ struct Circle : PlainShape
         hitPoint = origin + distance * direction;
         // (hitPoint - Center).Norm() <= Radius
         const Vec3f fromCenterToP = hitPoint - Center;
-        if(fromCenterToP*fromCenterToP <= Radius*Radius))
+        if(fromCenterToP*fromCenterToP <= Radius*Radius)
         {
             if(cosDd < 0) // the ray comes from the side of the circle that is pointed by its Direction vector
                 normal = Direction;
@@ -160,14 +160,17 @@ struct Rectangle : public PlainShape
         : PlainShape(center, direction, material), Width(width), Height(height)
     { RotateAxes(); }
 
-    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance) const override
+    virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance, 
+        Vec3f &hitPoint, Vec3f &normal) const override
     {
-        distance = ( Direction*(Center - origin) ) / (Direction*direction);
+        const float cosDd = Direction*direction;
+        if(cosDd == 0) return false; // the ray does not hit the rectangle, because they are parallel
+        distance = ( Direction*(Center - origin) ) / cosDd;
         if(distance <= 0) return false;
-        Vec3f p = origin + distance*direction;
+        hitPoint = origin + distance * direction;
 
         /* return true if:
-        1) projection of fromCenterToP = p - Center onto 'HorizontalAxis' has norm less than 'Width' / 2 and
+        1) projection of fromCenterToP = hitPoint - Center onto 'HorizontalAxis' has norm less than 'Width' / 2 and
         2) projection of fromCenterToP onto VerticalAxis has norm less than Height / 2
 
         1) cos(HorizontalAxis, fromCenterToP) = (fromCenterToP * HorizontalAxis) / (fromCenterToP.Norm() * 1)
@@ -177,18 +180,26 @@ struct Rectangle : public PlainShape
         fromCenterToP * HorizontalAxis
         horizontalDistance is the norm of the projection of fromCenterToP onto HorizontalAxis
 
-        2) verticalDistance = odleglosc * VerticalAxis
+        2) verticalDistance = fromCenterToP * VerticalAxis
         verticalDistance is the norm of the projection of fromCenterToP onto VerticalAxis */
         
-        Vec3f fromCenterToP = p - Center;
+        Vec3f fromCenterToP = hitPoint - Center;
         /* the norm of the projection (horizontal or vertical distance) is:
         - negative if the p point is to the left from the Center point on the rectangle
         - positive if the p point is to the right from the Center point on the rectangle
         - equal to 0 if the p point is equal to the Center point */
         const float horizontalLength = fromCenterToP * HorizontalAxis,
                     verticalLength = fromCenterToP * VerticalAxis;
-        return(horizontalLength <= Width / 2.f && horizontalLength >= -Width / 2.f &&
-            verticalLength <= Height / 2.f && verticalLength >= -Height / 2.f);
+        if(horizontalLength <= Width / 2.f && horizontalLength >= -Width / 2.f &&
+            verticalLength <= Height / 2.f && verticalLength >= -Height / 2.f)
+        {
+            if(cosDd < 0) // the ray comes from the side of the rectangle that is pointed by its Direction vector
+                normal = Direction;
+            else // the ray comes from the other side of the rectangle
+                normal = -Direction;
+            return true;
+        }
+        return false;
     }
 
     void SetDirection(const Vec3f &direction)
