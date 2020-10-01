@@ -143,11 +143,11 @@ public:
 
 private:
     int WorkingThreads;
-    void RenderFramePart(const int startY, const int endY)
+    void RenderFramePart(int y, const int endY)
     {
-        int y, x;
-        byte *p = FrameBuffer + 4 * Width * (Height / 2 - startY); // offset
-        for(y = startY; y > endY; --y) // going from top
+        int x;
+        byte *p = FrameBuffer + 4 * Width * (Height / 2 - y); // offset
+        for( ; y > endY; --y) // going from top
         {
             for(x = -Width / 2; x < Width / 2; ++x) // going from left
             {
