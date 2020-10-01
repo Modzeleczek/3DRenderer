@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <vector>
+#include <thread>
 #include "Vector.hpp"
 #include "Shapes.cpp"
 
@@ -104,12 +105,14 @@ private:
 public:
     const int Width, Height;
     byte *const FrameBuffer;
+    const int TotalThreads;
     std::vector<Shape*> Shapes;
     std::vector<Light*> Lights;
     Camera Eye;
 
-    Renderer(uint32_t frameWidth = 512, uint32_t frameHeight = 512)
-        : Width(frameWidth), Height(frameHeight), 
+    Renderer(const uint32_t frameWidth = 512, const uint32_t frameHeight = 512, 
+        const int numberOfThreads = 8)
+        : Width(frameWidth), Height(frameHeight), TotalThreads(numberOfThreads),
           FrameBuffer(new byte[Width * Height * 4]), // 4 bytes per pixel (RGBA)
           Eye(frameHeight) {}
     ~Renderer()
@@ -126,9 +129,25 @@ public:
 
     void RenderFrame()
     {
+        WorkingThreads = TotalThreads;
+        int y = Height / 2;
+        const int deltaY = Height / TotalThreads;
+        for(int i = 0; i < TotalThreads - 1; ++i)
+        {
+            std::thread(&Renderer::RenderFramePart, this, y, y - deltaY).detach();
+            y -= deltaY;
+        }
+        RenderFramePart(y, y - deltaY);
+        while(WorkingThreads > 0);
+    }
+
+private:
+    int WorkingThreads;
+    void RenderFramePart(const int startY, const int endY)
+    {
         int y, x;
-        byte *p = FrameBuffer;
-        for(y = Height / 2; y > -Height / 2; --y) // going from top
+        byte *p = FrameBuffer + 4 * Width * (Height / 2 - startY); // offset
+        for(y = startY; y > endY; --y) // going from top
         {
             for(x = -Width / 2; x < Width / 2; ++x) // going from left
             {
@@ -141,9 +160,9 @@ public:
                 // alpha value, which is ignored by GifWriter.
             }
         }
+        --WorkingThreads;
     }
 
-private:
     bool scene_intersect(const Vec3f &orig, const Vec3f &dir, Vec3f &closestShapeHitPoint, 
         Vec3f &closestShapeNormal, Material &material)
     {
