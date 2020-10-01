@@ -188,8 +188,8 @@ private:
         Vec3f point, N;
         Material material;
 
-        if (depth>4 || !scene_intersect(orig, dir, point, N, material))
-            return Vec3f(0.2f, 0.7f, 0.8f); // background color
+        if (depth>=3 || !scene_intersect(orig, dir, point, N, material))
+            return Vec3f(0.f, 0.f, 0.f); // background color
 
         Vec3f reflect_dir = reflect(dir, N).Normalize();
         Vec3f refract_dir = refract(dir, N, material.refractive_index).Normalize();
