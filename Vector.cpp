@@ -30,8 +30,19 @@ float Vec3f::Norm() const
 }
 Vec3f& Vec3f::Normalize()
 {
-    *this = (*this) * (1.f / Norm());
+    const float norm = Norm();
+    X /= norm;
+    Y /= norm;
+    Z /= norm;
     return *this;
+}
+float Vec3f::NormalizeReturnNorm()
+{
+    const float norm = Norm();
+    X /= norm;
+    Y /= norm;
+    Z /= norm;
+    return norm;
 }
 Vec3f reflect(const Vec3f &I, const Vec3f &N)
 {

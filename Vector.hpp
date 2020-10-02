@@ -32,6 +32,7 @@ struct Vec3f
     static Vec3f Cross(const Vec3f &v1, const Vec3f &v2); // cross product
     float Norm() const;
     Vec3f& Normalize();
+    float NormalizeReturnNorm();
     void RotateX(const float angle);
     void RotateX(const float sinA, const float cosA);
     void RotateY(const float angle);

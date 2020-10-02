@@ -231,8 +231,8 @@ private:
         float diffuse_light_intensity = 0, specular_light_intensity = 0;
         for (size_t i=0; i < Lights.size(); i++)
         {
-            Vec3f light_dir      = (Lights[i]->position - point).Normalize();
-            float light_distance = (Lights[i]->position - point).Norm();
+            Vec3f light_dir      = Lights[i]->position - point;
+            float light_distance = light_dir.NormalizeReturnNorm();
 
             Vec3f shadow_orig = light_dir*N < 0 ? point - N*1e-3 : point + N*1e-3; // checking if the point lies in the shadow of the Lights[i]
             Vec3f shadow_pt, shadow_N;
