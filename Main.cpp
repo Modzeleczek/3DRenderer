@@ -43,12 +43,12 @@ int main()
 
     renderer.Lights.push_back(new Light(Vec3f(-5, 10,  -1), 1.5));
     renderer.Lights.push_back(new Light(Vec3f( 5, 10, -1), 1.8));
-    // renderer.Lights.push_back(new Light(Vec3f( 30, 20,  -1), 1.7));
+    renderer.Lights.push_back(new Light(Vec3f( 5, 20,  -1), 1.7));
 
     // Negative angle rotates clockwise.
     // renderer.Eye.RotateY(-M_PI / 2);
 
-    const uint32_t totalFrames = 32;
+    const uint32_t totalFrames = 1;
     // const float rotationVelocity = M_PI * 1.f / (float) totalFrames;
     // float targetX = -5.f / 2.f;
     const float velocity = 5.f / totalFrames;

@@ -70,7 +70,11 @@ private:
         }
         Vec3f GetScreenPixelPosition(const int x, const int y)
         {
-            return HorizontalAxis * x + VerticalAxis * y + DirectionTimesDistance;
+            // return HorizontalAxis * x + VerticalAxis * y + DirectionTimesDistance;
+            return Vec3f(
+                HorizontalAxis.X * x + VerticalAxis.X * y + DirectionTimesDistance.X,
+                HorizontalAxis.Y * x + VerticalAxis.Y * y + DirectionTimesDistance.Y,
+                HorizontalAxis.Z * x + VerticalAxis.Z * y + DirectionTimesDistance.Z);
         }
         void SetDirection(const Vec3f &direction)
         {
