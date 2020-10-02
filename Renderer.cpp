@@ -192,6 +192,25 @@ private:
         return closestShapeDistance < 1000;
     }
 
+    bool scene_intersect(const Vec3f &orig, const Vec3f &dir, Vec3f &closestShapeHitPoint, 
+        Vec3f &closestShapeNormal)
+    {
+        byte i;
+        float closestShapeDistance = MAXFLOAT, distance;
+        Vec3f normal, hitPoint;
+        for(i = 0; i < Shapes.size(); ++i)
+        {
+            if(Shapes[i]->RayIntersect(orig, dir, distance, hitPoint, normal) &&
+                distance < closestShapeDistance)
+            {
+                closestShapeDistance = distance;
+                closestShapeHitPoint = hitPoint;
+                closestShapeNormal = normal;
+            }
+        }
+        return closestShapeDistance < 1000;
+    }
+
     Vec3f cast_ray(const Vec3f &orig, const Vec3f &dir, const byte depth = 0)
     {
         Vec3f point, N;
@@ -217,8 +236,7 @@ private:
 
             Vec3f shadow_orig = light_dir*N < 0 ? point - N*1e-3 : point + N*1e-3; // checking if the point lies in the shadow of the Lights[i]
             Vec3f shadow_pt, shadow_N;
-            Material tmpmaterial;
-            if (scene_intersect(shadow_orig, light_dir, shadow_pt, shadow_N, tmpmaterial) 
+            if (scene_intersect(shadow_orig, light_dir, shadow_pt, shadow_N) 
                 && (shadow_pt-shadow_orig).Norm() < light_distance)
                 continue;
 
