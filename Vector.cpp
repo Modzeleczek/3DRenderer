@@ -95,7 +95,14 @@ void Vec3f::RotateAxisQuaternion(const Vec3f &axis, const float angle)
 }
 Vec3f::operator Vec3b() const
 {
-    return Vec3b(255 * X, 255 * Y, 255 * Z);
+    Vec3b result;
+    if(X > 1.f) result.R = 255;
+    else result.R = 255 * X;
+    if(Y > 1.f) result.G = 255;
+    else result.G = 255 * Y;
+    if(Z > 1.f) result.B = 255;
+    else result.B = 255 * Z;
+    return result;
 }
 
 float operator*(const Vec3f &v1, const Vec3f &v2)
