@@ -42,29 +42,33 @@ private:
         void SetFieldOfView(float fieldOfView)
         {
             ScreenDistance = ScreenHeight / (2.f * tan(fieldOfView / 2.f));
-            DirectionTimesDistance = Direction * (ScreenHeight / (2.f * tan(fieldOfView / 2.f)));
+            DirectionTimesDistance = Direction * ScreenDistance;
         }
         void RotateX(float angle)
         {
             Direction.RotateX(angle);
+            DirectionTimesDistance = Direction * ScreenDistance;
             HorizontalAxis.RotateX(angle);
             VerticalAxis.RotateX(angle);
         }
         void RotateY(float angle)
         {
             Direction.RotateY(angle);
+            DirectionTimesDistance = Direction * ScreenDistance;
             HorizontalAxis.RotateY(angle);
             VerticalAxis.RotateY(angle);
         }
         void RotateZ(float angle)
         {
             Direction.RotateZ(angle);
+            DirectionTimesDistance = Direction * ScreenDistance;
             HorizontalAxis.RotateZ(angle);
             VerticalAxis.RotateZ(angle);
         }
         void RotateAxis(const Vec3f &axis, float angle)
         {
             Direction.RotateAxisQuaternion(axis, angle);
+            DirectionTimesDistance = Direction * ScreenDistance;
             HorizontalAxis.RotateAxisQuaternion(axis, angle);
             VerticalAxis.RotateAxisQuaternion(axis, angle);
         }
