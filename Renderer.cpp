@@ -42,6 +42,7 @@ private:
         void SetFieldOfView(float fieldOfView)
         {
             ScreenDistance = ScreenHeight / (2.f * tan(fieldOfView / 2.f));
+            DirectionTimesDistance = Direction * (ScreenHeight / (2.f * tan(fieldOfView / 2.f)));
         }
         void RotateX(float angle)
         {
@@ -69,37 +70,41 @@ private:
         }
         Vec3f GetScreenPixelPosition(const int x, const int y)
         {
-            return HorizontalAxis * x + VerticalAxis * y + Direction * ScreenDistance;
+            return HorizontalAxis * x + VerticalAxis * y + DirectionTimesDistance;
         }
         void SetDirection(const Vec3f &direction)
         {
             /*
             Algorithm:
-            1. compute the angles a and b, by which we need to consecutively rotate the vector (0,0,1) around the X and Y axes in order to get 'direction'
-            2. assign: 'HorizontalAxis' to its default value (1,0,0) and 'VerticalAxis' to its default value (0,1,0)
-            3. rotate 'HorizontalAxis' and 'VerticalAxis' by the angles a and b around axes X and Y, respectively
-            4. assign 'Direction' to 'direction'
+            1. assign 'Direction' to 'direction'
+            2. compute the angles a and b, by which we need to consecutively rotate the vector (0,0,1) around the X and Y axes in order to get 'direction'
+            3. assign: 'HorizontalAxis' to its default value (1,0,0) and 'VerticalAxis' to its default value (0,1,0)
+            4. rotate 'HorizontalAxis' and 'VerticalAxis' by the angles a and b around axes X and Y, respectively
             */
 
             // 1
+            Direction = direction;
+
+            // 2
             const float cosA_and_cosB = direction.Z,
                         sinB = direction.X,
                         sinA = direction.Y;
 
-            // 2
+            // 3
             HorizontalAxis = Vec3f(1,0,0);
             VerticalAxis = Vec3f(0,1,0);
 
-            // 3
+            // 4
             HorizontalAxis.RotateX(sinA, cosA_and_cosB);
             HorizontalAxis.RotateY(sinB, cosA_and_cosB);
 
             VerticalAxis.RotateX(sinA, cosA_and_cosB);
             VerticalAxis.RotateY(sinB, cosA_and_cosB);
-            
-            // 4
-            Direction = direction;
+
+            DirectionTimesDistance = Direction * ScreenDistance;
         }
+        private:
+            Vec3f DirectionTimesDistance;
     };
 
 public:

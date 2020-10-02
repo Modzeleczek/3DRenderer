@@ -1,3 +1,4 @@
+#include <chrono>
 #include "Vector.hpp"
 #include "Shapes.cpp"
 #include "Renderer.cpp"
@@ -22,7 +23,6 @@ int main()
     Material red_rubber(1.0, Vec4f(0.9,  0.1, 0.0, 0.0), Vec3f(0.3, 0.1, 0.1),   10.);
     Material     mirror(1.0, Vec4f(0.0, 10.0, 0.8, 0.0), Vec3f(1.0, 1.0, 1.0), 1425.);
 
-    srand(time(0));
     // walls
     renderer.Shapes.push_back(new Plane(Vec3f(-6,0,-20), Vec3f(1,0,0).Normalize(), 
         red_rubber));
@@ -52,6 +52,9 @@ int main()
     // const float rotationVelocity = M_PI * 1.f / (float) totalFrames;
     // float targetX = -5.f / 2.f;
     const float velocity = 5.f / totalFrames;
+
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
     for(uint32_t frameCounter = 0; frameCounter < totalFrames; ++frameCounter)
     {
         // renderer.Eye.SetDirection(Vec3f(targetX,0,-10).Normalize());
@@ -64,6 +67,16 @@ int main()
         renderer.Shapes[3]->Center.X += velocity;
     }
     GifEnd(&writer);
+
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+    std::chrono::nanoseconds difference = end - begin;
+
+    std::cout << renderer.Width << ' ' << renderer.Height << ' ' << renderer.TotalThreads << '\n' <<
+        "seconds\t" << std::chrono::duration_cast<std::chrono::seconds>(difference).count() << '\n' <<
+        "milli\t" << std::chrono::duration_cast<std::chrono::milliseconds>(difference).count() << '\n' <<
+        "micro\t" << std::chrono::duration_cast<std::chrono::microseconds>(difference).count() << '\n' <<
+        "nano\t" << std::chrono::duration_cast<std::chrono::nanoseconds>(difference).count() << '\n';
 
     return 0;
 }
