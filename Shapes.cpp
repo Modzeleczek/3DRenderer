@@ -209,22 +209,63 @@ struct Rectangle : public PlainShape
         RotateAxes();
     }
 
-private:
+public:
     Vec3f HorizontalAxis, VerticalAxis;
     void RotateAxes()
     {
-        const float cosA_and_cosB = Direction.Z,
-                    sinB = Direction.X,
-                    sinA = Direction.Y;
-
-        HorizontalAxis = Vec3f(1,0,0);
+        /*
+        Algorithm:
+        a) If Direction = (0,0,-1), the rotation axis = (0,0,-1) x Direction = (0,0,0), so the following algorithm will not work and we have to manually set HorizontalAxis to (1,0,0) and VerticalAxis to (0,1,0).
+        b) If Direction = (0,0,1), the rotation axis = (0,0,-1) x Direction = (0,0,0), so the following algorithm will not work and we have to manually set HorizontalAxis to (-1,0,0) and VerticalAxis to (0,1,0).
+        c) Otherwise:
+            newDir means the new value of Direction
+            1. Set Direction to newDir, HorizontalAxis to (1,0,0) and VerticalAxis to (0,1,0).
+            2. Compute the axis, around which we would rotate (0,0,-1) vector to get newDir.
+                axis = ( (0,0,-1) x newDir ).Normalize();
+            3. Compute the angle, by which we would rotate (0,0,-1) vector to get newDir.
+                a = acosf( (0,0,-1) * newDir )
+            4. Rotate HorizontalAxis and VerticalAxis around the axis computed in 2. by the angle computed in 3.
+        */
+        // method 1
+        /*HorizontalAxis = Vec3f(1,0,0);
         VerticalAxis = Vec3f(0,1,0);
 
-        HorizontalAxis.RotateX(sinA, cosA_and_cosB);
-        HorizontalAxis.RotateY(sinB, cosA_and_cosB);
+        if(Direction.X == 0 && Direction.Y == 0)
+            return;
 
-        VerticalAxis.RotateX(sinA, cosA_and_cosB);
-        VerticalAxis.RotateY(sinB, cosA_and_cosB);
+        const Vec3f axis = Vec3f::Cross(Vec3f(0,0,-1), Direction).Normalize();
+        const float angle = acosf(Vec3f(0,0,-1) * Direction);
+        
+        HorizontalAxis.RotateAxisQuaternion(axis, angle);
+        VerticalAxis.RotateAxisQuaternion(axis, angle);*/
+
+        // method 2 - the same as method 1, but with mathematics simplified for efficiency
+        if(Direction.X == 0 && Direction.Y == 0)
+        {
+            VerticalAxis = Vec3f(0,1,0);
+            if(Direction.Z == -1)
+                HorizontalAxis = Vec3f(1,0,0);
+            else // if(Direction.Z == 1)
+                HorizontalAxis = Vec3f(-1,0,0);
+        }
+        else
+        {
+            const float x = Direction.X, y = Direction.Y, z = Direction.Z, commonCoefficient = (1.f + z) / (x*x + y*y);
+
+            // HorizontalAxis = (y^2 * (1 + z) / (x^2 + y^2) - z, -x*y * (1 + z) / (x^2 + y^2), x)
+            // VerticalAxis = (-x*y * (1 + z) / (x^2 + y^2), x^2 * (1 + z) / (x^2 + y^2) - z, y)*/
+
+            HorizontalAxis.X = y*y * commonCoefficient - z;
+            HorizontalAxis.Y = -x*y * commonCoefficient;
+            HorizontalAxis.Z = x;
+
+            VerticalAxis.X = -x*y * commonCoefficient;
+            VerticalAxis.Y = x*x * commonCoefficient - z;
+            VerticalAxis.Z = y;
+        }
+
+        std::cout << HorizontalAxis.X << ' ' << HorizontalAxis.Y << ' ' << HorizontalAxis.Z << '\n';
+        std::cout << VerticalAxis.X << ' ' << VerticalAxis.Y << ' ' << VerticalAxis.Z << '\n';
     }
 };
 
