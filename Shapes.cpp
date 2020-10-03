@@ -263,9 +263,6 @@ public:
             VerticalAxis.Y = x*x * commonCoefficient - z;
             VerticalAxis.Z = y;
         }
-
-        std::cout << HorizontalAxis.X << ' ' << HorizontalAxis.Y << ' ' << HorizontalAxis.Z << '\n';
-        std::cout << VerticalAxis.X << ' ' << VerticalAxis.Y << ' ' << VerticalAxis.Z << '\n';
     }
 };
 
