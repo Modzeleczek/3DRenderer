@@ -4,39 +4,101 @@
 #include <cmath>
 #include <vector>
 #include <thread>
+#include <atomic>
 #include "Vector.hpp"
 #include "Shapes.cpp"
+
+class LocalCoordinateSystem
+{
+protected:
+    // A unit vector, which indicates coordinate system's horizontal axis.
+    Vec3f HorizontalAxis;
+    // A unit vector, which indicates coordinate system's vertical axis.
+    Vec3f VerticalAxis;
+    // A vector, which indicates the facing of the coordinate system.
+    Vec3f Direction;
+    // The 3 vectors, HorizontalAxis, VerticalAxis and Direction, together make a 
+    // local (possibly rotated) coordinate system.
+    
+    LocalCoordinateSystem(const Vec3f &horizontalAxis = Vec3f(1,0,0),
+    const Vec3f &verticalAxis = Vec3f(0,1,0), const Vec3f &direction = Vec3f(0,0,-1))
+        : HorizontalAxis(horizontalAxis), VerticalAxis(verticalAxis), Direction(direction) {}
+
+    void RotateX(float angle)
+    {
+        Direction.RotateX(angle);
+        HorizontalAxis.RotateX(angle);
+        VerticalAxis.RotateX(angle);
+    }
+    void RotateY(float angle)
+    {
+        Direction.RotateY(angle);
+        HorizontalAxis.RotateY(angle);
+        VerticalAxis.RotateY(angle);
+    }
+    void RotateZ(float angle)
+    {
+        Direction.RotateZ(angle);
+        HorizontalAxis.RotateZ(angle);
+        VerticalAxis.RotateZ(angle);
+    }
+    void RotateAxis(const Vec3f &axis, float angle)
+    {
+        Direction.RotateAxisQuaternion(axis, angle);
+        HorizontalAxis.RotateAxisQuaternion(axis, angle);
+        VerticalAxis.RotateAxisQuaternion(axis, angle);
+    }
+    void SetDirection(const Vec3f &direction)
+    {
+        /*
+        Algorithm:
+        1. assign 'Direction' to 'direction'
+        2. compute the angles a and b, by which we need to consecutively rotate the vector (0,0,1) around the X and Y axes in order to get 'direction'
+        3. assign: 'HorizontalAxis' to its default value (1,0,0) and 'VerticalAxis' to its default value (0,1,0)
+        4. rotate 'HorizontalAxis' and 'VerticalAxis' by the angles a and b around axes X and Y, respectively
+        */
+
+        // 1
+        Direction = direction;
+
+        // 2
+        const float cosA_and_cosB = direction.Z,
+                    sinB = direction.X,
+                    sinA = direction.Y;
+
+        // 3
+        HorizontalAxis = Vec3f(1,0,0);
+        VerticalAxis = Vec3f(0,1,0);
+
+        // 4
+        HorizontalAxis.RotateX(sinA, cosA_and_cosB);
+        HorizontalAxis.RotateY(sinB, cosA_and_cosB);
+
+        VerticalAxis.RotateX(sinA, cosA_and_cosB);
+        VerticalAxis.RotateY(sinB, cosA_and_cosB);
+    }
+};
 
 class Renderer
 {
 private:
-    class Camera
+    class Camera : public LocalCoordinateSystem
     {
     public:
-        // position of the camera
+        // Position of the camera.
         Vec3f Position;
     private:
-        // a unit vector, which indicates screen's horizontal axis
-        Vec3f HorizontalAxis;
-        // a unit vector, which indicates screen's vertical axis
-        Vec3f VerticalAxis;
-        // a vector, which is perpendicular to the screen (indicates camera's direction)
-        Vec3f Direction;
-        // The 3 vectors, HorizontalAxis, VerticalAxis and Direction, together make a 
-        // rotated coordinate system.
-        // distance between camera and screen depending on field of view
+        // Distance between camera and screen depending on field of view.
         float ScreenDistance;
-        // used to compute screen distance
+        // A vector from camera's position to the center of the screen.
+        Vec3f DirectionTimesDistance;
+        // Used to compute distance between the camera and the screen.
         const int ScreenHeight;
 
     public:
-        Camera(uint32_t frameHeight = 512, float fieldOfView = M_PI / 3.f, const Vec3f &position = Vec3f(0,0,0))
-            : ScreenHeight(frameHeight)
+        Camera(uint32_t frameHeight = 512, float fieldOfView = M_PI / 3.f, 
+            const Vec3f &position = Vec3f(0,0,0)) : ScreenHeight(frameHeight), Position(position)
         {
-            Position = position;
-            Direction = Vec3f(0,0,-1);
-            HorizontalAxis = Vec3f(1,0,0);
-            VerticalAxis = Vec3f(0,1,0);
             SetFieldOfView(fieldOfView);
         }
         void SetFieldOfView(float fieldOfView)
@@ -46,31 +108,23 @@ private:
         }
         void RotateX(float angle)
         {
-            Direction.RotateX(angle);
+            this->LocalCoordinateSystem::RotateX(angle);
             DirectionTimesDistance = Direction * ScreenDistance;
-            HorizontalAxis.RotateX(angle);
-            VerticalAxis.RotateX(angle);
         }
         void RotateY(float angle)
         {
-            Direction.RotateY(angle);
+            this->LocalCoordinateSystem::RotateY(angle);
             DirectionTimesDistance = Direction * ScreenDistance;
-            HorizontalAxis.RotateY(angle);
-            VerticalAxis.RotateY(angle);
         }
         void RotateZ(float angle)
         {
-            Direction.RotateZ(angle);
+            this->LocalCoordinateSystem::RotateZ(angle);
             DirectionTimesDistance = Direction * ScreenDistance;
-            HorizontalAxis.RotateZ(angle);
-            VerticalAxis.RotateZ(angle);
         }
         void RotateAxis(const Vec3f &axis, float angle)
         {
-            Direction.RotateAxisQuaternion(axis, angle);
+            this->LocalCoordinateSystem::RotateAxis(axis, angle);
             DirectionTimesDistance = Direction * ScreenDistance;
-            HorizontalAxis.RotateAxisQuaternion(axis, angle);
-            VerticalAxis.RotateAxisQuaternion(axis, angle);
         }
         Vec3f GetScreenPixelPosition(const int x, const int y)
         {
@@ -80,39 +134,11 @@ private:
                 HorizontalAxis.Y * x + VerticalAxis.Y * y + DirectionTimesDistance.Y,
                 HorizontalAxis.Z * x + VerticalAxis.Z * y + DirectionTimesDistance.Z);
         }
-        void SetDirection(const Vec3f &direction)
+        virtual void SetDirection(const Vec3f &direction)
         {
-            /*
-            Algorithm:
-            1. assign 'Direction' to 'direction'
-            2. compute the angles a and b, by which we need to consecutively rotate the vector (0,0,1) around the X and Y axes in order to get 'direction'
-            3. assign: 'HorizontalAxis' to its default value (1,0,0) and 'VerticalAxis' to its default value (0,1,0)
-            4. rotate 'HorizontalAxis' and 'VerticalAxis' by the angles a and b around axes X and Y, respectively
-            */
-
-            // 1
-            Direction = direction;
-
-            // 2
-            const float cosA_and_cosB = direction.Z,
-                        sinB = direction.X,
-                        sinA = direction.Y;
-
-            // 3
-            HorizontalAxis = Vec3f(1,0,0);
-            VerticalAxis = Vec3f(0,1,0);
-
-            // 4
-            HorizontalAxis.RotateX(sinA, cosA_and_cosB);
-            HorizontalAxis.RotateY(sinB, cosA_and_cosB);
-
-            VerticalAxis.RotateX(sinA, cosA_and_cosB);
-            VerticalAxis.RotateY(sinB, cosA_and_cosB);
-
+            this->LocalCoordinateSystem::SetDirection(direction);
             DirectionTimesDistance = Direction * ScreenDistance;
         }
-        private:
-            Vec3f DirectionTimesDistance;
     };
 
 public:
