@@ -144,13 +144,13 @@ private:
 public:
     const int Width, Height;
     byte *const FrameBuffer;
-    const int TotalThreads;
+    const byte TotalThreads;
     std::vector<Shape*> Shapes;
     std::vector<Light*> Lights;
     Camera Eye;
 
     Renderer(const uint32_t frameWidth = 512, const uint32_t frameHeight = 512, 
-        const int numberOfThreads = 8)
+        const byte numberOfThreads = 8)
         : Width(frameWidth), Height(frameHeight), TotalThreads(numberOfThreads),
           FrameBuffer(new byte[Width * Height * 4]), // 4 bytes per pixel (RGBA)
           Eye(frameHeight) {}
@@ -181,7 +181,7 @@ public:
     }
 
 private:
-    int WorkingThreads;
+    std::atomic<byte> WorkingThreads;
     void RenderFramePart(int y, const int endY)
     {
         int x;
