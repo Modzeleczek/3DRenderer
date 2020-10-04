@@ -74,7 +74,7 @@ struct Sphere : public Shape
     }
 };
 
-struct Cube : Shape
+struct Cube : public Shape
 {
     float Edge;
 
@@ -88,7 +88,7 @@ struct Cube : Shape
     }
 };
 
-struct PlainShape : Shape
+struct PlainShape : public Shape
 {
 protected:
     Vec3f Direction;
@@ -98,7 +98,7 @@ public:
     virtual void SetDirection(const Vec3f &direction) { Direction = direction; }
 };
 
-struct Circle : PlainShape
+struct Circle : public PlainShape
 {
     float Radius;
 
@@ -203,13 +203,37 @@ struct Rectangle : public PlainShape
         return false;
     }
 
-    void SetDirection(const Vec3f &direction)
+    virtual void SetDirection(const Vec3f &direction)
     {
         Direction = direction;
         RotateAxes();
     }
+    void RotateX(float angle)
+    {
+        Direction.RotateX(angle);
+        HorizontalAxis.RotateX(angle);
+        VerticalAxis.RotateX(angle);
+    }
+    void RotateY(float angle)
+    {
+        Direction.RotateY(angle);
+        HorizontalAxis.RotateY(angle);
+        VerticalAxis.RotateY(angle);
+    }
+    void RotateZ(float angle)
+    {
+        Direction.RotateZ(angle);
+        HorizontalAxis.RotateZ(angle);
+        VerticalAxis.RotateZ(angle);
+    }
+    void RotateAxis(const Vec3f &axis, float angle)
+    {
+        Direction.RotateAxisQuaternion(axis, angle);
+        HorizontalAxis.RotateAxisQuaternion(axis, angle);
+        VerticalAxis.RotateAxisQuaternion(axis, angle);
+    }
 
-public:
+private:
     Vec3f HorizontalAxis, VerticalAxis;
     void RotateAxes()
     {

@@ -61,16 +61,16 @@ int main()
     float velocity = -0.25f;
 
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-    renderer.Eye.SetDirection(Vec3f(0,0,1));
-    renderer.Eye.RotateY(-M_PI / 12.f);
+    //renderer.Eye.SetDirection(Vec3f(0,0,1));
+    //renderer.Eye.RotateY(-M_PI / 12.f);
     Rectangle* r = (Rectangle*) renderer.Shapes[3];
     r->SetDirection(Vec3f(1,1,0).Normalize());
     Sphere* s = (Sphere*) renderer.Shapes[4];
     for(uint32_t frameCounter = 0; frameCounter < totalFrames; ++frameCounter)
     {
-        // Vec3f dir = s->Center - r->Center;
-        // r->SetDirection(dir.Normalize());
-         //renderer.Eye.SetDirection(Vec3f(targetX,targetX,-10).Normalize());
+        Vec3f dir = s->Center - renderer.Eye.Position;
+        renderer.Eye.SetDirection(dir.Normalize());
+        // renderer.Eye.SetDirection(Vec3f(targetX,targetX,-10).Normalize());
         renderer.RenderFrame();
         GifWriteFrame(&writer, renderer.FrameBuffer,
             renderer.Width, renderer.Height, delay);
