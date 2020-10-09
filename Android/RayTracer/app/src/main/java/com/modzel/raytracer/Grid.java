@@ -112,8 +112,8 @@ public class Grid {
         IndicesBuffer.position(0);
 
         // prepare shaders
-        int vertexShader = GLESView.loadShader(GLES20.GL_VERTEX_SHADER, VertexShaderCode);
-        int fragmentShader = GLESView.loadShader(GLES20.GL_FRAGMENT_SHADER, FragmentShaderCode);
+        int vertexShader = GLESView.LoadShader(GLES20.GL_VERTEX_SHADER, VertexShaderCode);
+        int fragmentShader = GLESView.LoadShader(GLES20.GL_FRAGMENT_SHADER, FragmentShaderCode);
 
         // prepare OpenGL program
         ProgramHandle = GLES20.glCreateProgram();             // create empty OpenGL Program
@@ -131,7 +131,7 @@ public class Grid {
 
         // Get handle to vertex shader's aPosition member.
         PositionHandle = GLES20.glGetAttribLocation(ProgramHandle, "aPosition");
-        GLESView.checkGlError("glGetAttribLocation");
+        GLESView.CheckGlError("glGetAttribLocation");
 
         // Enable edition of 'aPosition' attribute in the vertex shader.
         GLES20.glEnableVertexAttribArray(PositionHandle);
@@ -141,11 +141,11 @@ public class Grid {
                 PositionHandle, COORDS_PER_VERTEX,
                 GLES20.GL_FLOAT, false, // GLES20.GL_FALSE
                 VertexStride, VerticesBuffer);
-        GLESView.checkGlError("glVertexAttribPointer");
+        GLESView.CheckGlError("glVertexAttribPointer");
 
         // Get handle to fragment shader's aColor member.
         ColorHandle = GLES20.glGetAttribLocation(ProgramHandle, "aColor");
-        GLESView.checkGlError("glGetAttribLocation");
+        GLESView.CheckGlError("glGetAttribLocation");
 
         // Enable edition of 'aColor' attribute in the fragment shader.
         GLES20.glEnableVertexAttribArray(ColorHandle);
@@ -155,7 +155,7 @@ public class Grid {
                 ColorHandle, COLOR_COMPONENTS_PER_VERTEX,
                 GLES20.GL_FLOAT, false,
                 ColorStride, ColorsBuffer);
-        GLESView.checkGlError("glVertexAttribPointer");
+        GLESView.CheckGlError("glVertexAttribPointer");
 
         // Draw the grid.
         GLES20.glDrawElements(
