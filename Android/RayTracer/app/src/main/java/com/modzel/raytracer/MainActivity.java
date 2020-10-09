@@ -5,9 +5,13 @@ import android.os.Bundle;
 
 public class MainActivity extends Activity {
 
+    GLESView AppView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        
+        AppView = new GLESView(this);
+        setContentView(AppView);
     }
 }
