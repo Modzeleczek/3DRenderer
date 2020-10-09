@@ -1,5 +1,3 @@
-.vscode/*
-*.out
-*.bmp
-*.gif
-maths/*
+.vscode
+maths
+build
