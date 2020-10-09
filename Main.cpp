@@ -23,8 +23,8 @@ int main()
     Material red_rubber(1.0, Vec4f(0.9,  0.1, 0.0, 0.0), Vec3f(0.3, 0.1, 0.1),   10.);
     Material     mirror(1.0, Vec4f(0.0, 10.0, 0.8, 0.0), Vec3f(1.0, 1.0, 1.0), 1425.);
 
-    Material blue_rubber(red_rubber.refractive_index, red_rubber.albedo,
-        Vec3f(0.1, 0.1, 0.3), red_rubber.specular_exponent);
+    Material blue_rubber(red_rubber.RefractiveIndex, red_rubber.Albedo,
+        Vec3f(0.1, 0.1, 0.3), red_rubber.SpecularExponent);
 
     // walls
     renderer.Shapes.push_back(new Plane(Vec3f(-6,0,-20), Vec3f(1,0,0).Normalize(), 

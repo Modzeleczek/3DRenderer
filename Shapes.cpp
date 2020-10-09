@@ -6,29 +6,29 @@
 
 struct Light
 {
-    Vec3f position;
-    float intensity;
+    Vec3f Position;
+    float Intensity;
 
-    Light(const Vec3f &p, const float i) : position(p), intensity(i) {}
+    Light(const Vec3f &position, const float intensity) : Position(position), Intensity(intensity) {}
 };
 
 struct Material
 {
-    float refractive_index;
-    Vec4f albedo;
-    Vec3f diffuse_color;
-    float specular_exponent;
+    float RefractiveIndex;
+    Vec4f Albedo;
+    Vec3f DiffuseColor;
+    float SpecularExponent;
 
-    Material(const float r, const Vec4f &a, const Vec3f &color, const float spec)
-        : refractive_index(r), albedo(a), diffuse_color(color), specular_exponent(spec) {}
-    Material() : refractive_index(1), albedo(1,0,0,0), diffuse_color(), specular_exponent() {}
+    Material(const float refractiveIndex, const Vec4f &albedo, const Vec3f &color, const float specularExponent)
+        : RefractiveIndex(refractiveIndex), Albedo(albedo), DiffuseColor(color), SpecularExponent(specularExponent) {}
+    Material() : RefractiveIndex(1), Albedo(1,0,0,0), DiffuseColor(), SpecularExponent() {}
 };
 
 struct Shape
 {
     Vec3f Center;
-    Material _material;
-    Shape(const Vec3f &center, const Material &material) : Center(center), _material(material) {}
+    Material Surface;
+    Shape(const Vec3f &center, const Material &material) : Center(center), Surface(material) {}
     virtual bool RayIntersect(const Vec3f &origin, const Vec3f &direction, float &distance, Vec3f &hitPoint, Vec3f &normal)
         const = 0;
 };
