@@ -1,8 +1,10 @@
 package com.modzel.raytracer;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 
@@ -27,10 +29,11 @@ public class GLESView extends GLSurfaceView {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_MOVE:
-                //x = (event.getX() - 540.f)/540.f;//1080/2
-                //y = (event.getY() - 1124.f)/1124.f;//2248/2
+                // TouchX = (event.getX() - 540.f) / 540.f; // 1080 / 2; normalized X, in range <-1,1>
+                // TouchY = (event.getY() - 1014.f) / 1014.f; // 2029 / 2; normalized Y, in range <-1,1>
                 TouchX = (int)event.getRawX();
                 TouchY = (int)event.getRawY();
+                RendererInstance.PaintCell();
                 break;
             case MotionEvent.ACTION_UP:
                 break;
@@ -83,11 +86,16 @@ public class GLESView extends GLSurfaceView {
 
     public class Renderer implements GLSurfaceView.Renderer {
 
-        private Grid GridInstance;
+        public Grid GridInstance;
+        private int ScreenWidth, ScreenHeight;
 
         // Method invoked, when the program starts.
         @Override
         public void onSurfaceCreated(GL10 unused, EGLConfig eglConfig) {
+            DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+            ScreenWidth = metrics.widthPixels; // 1080
+            ScreenHeight = metrics.heightPixels; // 2029
+
             // Set the background frame color.
             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             // Create the grid.
@@ -107,6 +115,12 @@ public class GLESView extends GLSurfaceView {
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
             // Draw the grid.
             GridInstance.Draw();
+        }
+
+        public void PaintCell() {
+            GridInstance.SetCell((int)( (TouchX * GridInstance.Columns) / ScreenWidth)
+                    + (GridInstance.Columns + 1) * (int)( (TouchY * GridInstance.Rows) / ScreenHeight),
+                    0, 1, 0, 1);
         }
     }
 }

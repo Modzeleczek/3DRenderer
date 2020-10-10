@@ -23,7 +23,7 @@ public class Grid {
             "  gl_FragColor = vColor;" +
             "}";
 
-    private int Columns, Rows;
+    public final int Columns, Rows;
     private FloatBuffer VerticesBuffer, ColorsBuffer;
     private ShortBuffer IndicesBuffer;
     private int IndicesBufferLength;
@@ -166,5 +166,25 @@ public class Grid {
         GLES20.glDisableVertexAttribArray(PositionHandle);
         // Disable edition of 'aColor' attribute in the fragment shader.
         GLES20.glDisableVertexAttribArray(ColorHandle);
+    }
+
+    public void SetCell(int index, float r, float g, float b, float a) {
+        ColorsBuffer.position(4 * index);
+        // top left and top right
+        for(int i = 0; i < 2; ++i) {
+            ColorsBuffer.put(r);
+            ColorsBuffer.put(g);
+            ColorsBuffer.put(b);
+            ColorsBuffer.put(a);
+        }
+        ColorsBuffer.position(4 * (index + Columns + 1));
+        // bottom left and bottom right
+        for(int i = 0; i < 2; ++i) {
+            ColorsBuffer.put(r);
+            ColorsBuffer.put(g);
+            ColorsBuffer.put(b);
+            ColorsBuffer.put(a);
+        }
+        ColorsBuffer.position(0);
     }
 }
