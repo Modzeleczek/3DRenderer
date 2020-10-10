@@ -177,7 +177,8 @@ public class Grid {
             ColorsBuffer.put(b);
             ColorsBuffer.put(a);
         }
-        ColorsBuffer.position(4 * (index + Columns + 1));
+        // ColorsBuffer.position(4 * (index + Columns + 1)); // equivalent
+        ColorsBuffer.position(ColorsBuffer.position() + 4 * (Columns - 1));
         // bottom left and bottom right
         for(int i = 0; i < 2; ++i) {
             ColorsBuffer.put(r);
