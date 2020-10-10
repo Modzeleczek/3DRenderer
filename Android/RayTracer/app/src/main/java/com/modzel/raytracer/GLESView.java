@@ -118,9 +118,11 @@ public class GLESView extends GLSurfaceView {
         }
 
         public void PaintCell() {
-            GridInstance.SetCell((int)( (TouchX * GridInstance.Columns) / ScreenWidth)
-                    + (GridInstance.Columns + 1) * (int)( (TouchY * GridInstance.Rows) / ScreenHeight),
-                    0, 1, 0, 1);
+            int index = (int)( (TouchX * GridInstance.Columns) / ScreenWidth)
+                    + (GridInstance.Columns + 1) * (int)( (TouchY * GridInstance.Rows) / ScreenHeight);
+            // (cols + 1) * (rows + 1) - (cols + 1) = (cols + 1) * rows
+            if(index < (GridInstance.Columns + 1) * GridInstance.Rows)
+                GridInstance.SetCell(index, 0, 1, 0, 1);
         }
     }
 }
