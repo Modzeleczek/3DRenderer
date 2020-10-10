@@ -5,9 +5,10 @@ public class Vec3f {
     public float X, Y, Z;
 
     public Vec3f(float x, float y, float z) {
-        X = x;
-        Y = y;
-        Z = z;
+        X = x; Y = y; Z = z;
+    }
+    public Vec3f(Vec3f o) {
+        X = o.X; Y = o.Y; Z = o.Z;
     }
 
     public Vec3f Add(Vec3f v) {
