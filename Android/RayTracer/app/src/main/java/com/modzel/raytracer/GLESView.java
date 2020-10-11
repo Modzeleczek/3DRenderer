@@ -105,7 +105,39 @@ public class GLESView extends GLSurfaceView {
             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             // Create the grid.
             GridInstance = new Grid(16, 16);
+
             SceneRenderer = new com.modzel.raytracer.Renderer(GridInstance);
+
+            // predefined materials
+            Material ivory = new Material(1.0f, new Vec4f(0.6f,  0.3f, 0.1f, 0.0f), new Vec3f(0.4f, 0.4f, 0.3f),   50.f);
+            Material glass = new Material(1.5f, new Vec4f(0.0f,  0.5f, 0.1f, 0.8f), new Vec3f(0.6f, 0.7f, 0.8f),  125.f);
+            Material red_rubber = new Material(1.0f, new Vec4f(0.9f,  0.1f, 0.0f, 0.0f), new Vec3f(0.3f, 0.1f, 0.1f),   10.f);
+            Material mirror = new Material(1.0f, new Vec4f(0.0f, 10.0f, 0.8f, 0.0f), new Vec3f(1.0f, 1.0f, 1.0f), 1425.f);
+
+            Material blue_rubber = new Material(red_rubber.RefractiveIndex, red_rubber.Albedo, new Vec3f(0.1f, 0.1f, 0.3f), red_rubber.SpecularExponent);
+
+            // walls
+            SceneRenderer.Shapes.add(new Plane(new Vec3f(-6,0,-20), new Vec3f(1,0,0).Normalize(),
+                    ivory));
+            SceneRenderer.Shapes.add(new Plane(new Vec3f(5,0,-15), new Vec3f(0,0,1).Normalize(),
+                    red_rubber));
+            SceneRenderer.Shapes.add(new Plane(new Vec3f(0,-4,0), new Vec3f(0,1,0).Normalize(),
+                    blue_rubber));
+
+            // shapes
+            // renderer.Shapes.push_back(new Circle(Vec3f(-3,0,-10), 2, Vec3f(0,1,1).Normalize(),
+            //    ivory));
+            SceneRenderer.Shapes.add(new Rectangle(new Vec3f(3,2,-6), 2, 2, new Vec3f(0,0,1).Normalize(),
+                    ivory));
+            SceneRenderer.Shapes.add(new Sphere(new Vec3f(3,5,-10), 2,
+                    mirror));
+            // renderer.Shapes.push_back(new Ellipse(Vec3f(6,0,-10), Vec3f(6,0,-10), 1, Vec3f(0,0,1).Normalize(),
+            //    ivory));
+
+            // lights
+            SceneRenderer.Lights.add(new Light(new Vec3f(-5, 10,  -1), 1.5f));
+            SceneRenderer.Lights.add(new Light(new Vec3f( 5, 10, -1), 1.8f));
+            SceneRenderer.Lights.add(new Light(new Vec3f( 5, 20,  -1), 1.7f));
         }
 
         @Override
