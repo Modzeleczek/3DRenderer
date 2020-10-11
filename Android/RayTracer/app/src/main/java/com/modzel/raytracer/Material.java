@@ -25,4 +25,12 @@ public class Material {
         DiffuseColor = new Vec3f(o.DiffuseColor);
         SpecularExponent = o.SpecularExponent;
     }
+
+    public void CopyFrom(Material o) {
+        RefractiveIndex = o.RefractiveIndex;
+        // Can be copied shallowly, because Material objects are used read-only in the whole program.
+        Albedo = o.Albedo;
+        DiffuseColor = o.DiffuseColor;
+        SpecularExponent = o.SpecularExponent;
+    }
 }
