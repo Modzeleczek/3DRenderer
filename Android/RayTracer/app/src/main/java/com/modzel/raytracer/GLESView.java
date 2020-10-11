@@ -17,6 +17,8 @@ public class GLESView extends GLSurfaceView {
 
     private int ScreenWidth, ScreenHeight;
     private int TouchX, TouchY;
+    private float Velocity;
+
     public GLESView(Context context) {
         super(context);
 
@@ -24,19 +26,41 @@ public class GLESView extends GLSurfaceView {
         OpenGLRenderer = new Renderer();
         setRenderer(OpenGLRenderer);
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        Velocity = 1.f / 2.f;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-            //case MotionEvent.ACTION_MOVE:
-                /* TouchX = (event.getX() - 540.f) / 540.f; // 1080 / 2; normalized X, in range <-1,1>
-                TouchY = (event.getY() - 1014.f) / 1014.f; // 2029 / 2; normalized Y, in range <-1,1> */
-                /* TouchX = (int)event.getRawX();
+            case MotionEvent.ACTION_MOVE:
+                TouchX = (int)event.getRawX();
                 TouchY = (int)event.getRawY();
-                OpenGLRenderer.PaintCell(); */
-                OpenGLRenderer.SceneRenderer.Eye.RotateY((float)Math.PI / 16.f);
+
+                if(TouchY >= ScreenHeight - ScreenHeight / 4 && TouchY < ScreenHeight) { // buttons area
+                    if(TouchY >= ScreenHeight - ScreenHeight / 8) { // lower buttons row
+                        if(TouchX < ScreenWidth / 3) { // left lower button
+                            OpenGLRenderer.SceneRenderer.Eye.Position.X -= Velocity;
+                        }
+                        else if (TouchX < 2 * (ScreenWidth / 3)) { // middle lower button
+                            OpenGLRenderer.SceneRenderer.Eye.Position.Y -= Velocity;
+                        }
+                        else { // right lower button
+                            OpenGLRenderer.SceneRenderer.Eye.Position.X += Velocity;
+                        }
+                    }
+                    else { // upper buttons row
+                        if(TouchX < ScreenWidth / 3) { // left upper button
+                            OpenGLRenderer.SceneRenderer.Eye.Position.Z -= Velocity;
+                        }
+                        else if (TouchX < 2 * (ScreenWidth / 3)) { // middle upper button
+                            OpenGLRenderer.SceneRenderer.Eye.Position.Y += Velocity;
+                        }
+                        else { // right upper button
+                            OpenGLRenderer.SceneRenderer.Eye.Position.Z += Velocity;
+                        }
+                    }
+                }
                 OpenGLRenderer.SceneRenderer.RenderFrame();
                 // After GLSurfaceView.requestRender is called, GLSurfaceView.Renderer.onDrawFrame is called.
                 this.requestRender();
