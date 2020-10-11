@@ -10,6 +10,6 @@ public abstract class PlainShape extends Shape {
     }
 
     public void SetDirection(Vec3f direction) {
-        Direction = new Vec3f(direction);
+        Direction = direction;
     }
 }
