@@ -20,9 +20,9 @@ public class GLESView extends GLSurfaceView {
         super(context);
 
         setEGLContextClientVersion(2); // OpenGL ES 2.0
-        // setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         OpenGLRenderer = new Renderer();
         setRenderer(OpenGLRenderer);
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     }
 
     @Override
@@ -37,6 +37,8 @@ public class GLESView extends GLSurfaceView {
                 // RendererInstance.PaintCell();
                 OpenGLRenderer.SceneRenderer.Eye.RotateX((float)Math.PI / 16.f);
                 OpenGLRenderer.SceneRenderer.RenderFrame();
+                // After GLSurfaceView.requestRender is called, GLSurfaceView.Renderer.onDrawFrame is called.
+                this.requestRender();
                 break;
             case MotionEvent.ACTION_UP:
                 break;
