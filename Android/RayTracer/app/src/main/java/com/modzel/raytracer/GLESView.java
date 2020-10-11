@@ -15,6 +15,7 @@ public class GLESView extends GLSurfaceView {
 
     private Renderer OpenGLRenderer;
 
+    private int ScreenWidth, ScreenHeight;
     private int TouchX, TouchY;
     public GLESView(Context context) {
         super(context);
@@ -96,7 +97,6 @@ public class GLESView extends GLSurfaceView {
 
         public Grid GridInstance;
         public com.modzel.raytracer.Renderer SceneRenderer;
-        private int ScreenWidth, ScreenHeight;
 
         // Method invoked, when the program starts.
         @Override
