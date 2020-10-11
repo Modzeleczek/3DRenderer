@@ -9,5 +9,6 @@ public abstract class Shape {
         Center = new Vec3f(center);
         Surface = new Material(material);
     }
-    public abstract boolean RayIntersect(Vec3f origin, Vec3f direction, float distance, Vec3f hitPoint, Vec3f normal);
+    public abstract boolean RayIntersect(Vec3f origin, Vec3f direction, FloatWrapper distance, Vec3f hitPoint,
+                                         Vec3f normal);
 }

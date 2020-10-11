@@ -11,7 +11,7 @@ public class Cube extends Shape {
     }
 
     @Override
-    public boolean RayIntersect(Vec3f origin, Vec3f direction, float distance, Vec3f hitPoint, Vec3f normal) {
+    public boolean RayIntersect(Vec3f origin, Vec3f direction, FloatWrapper distance, Vec3f hitPoint, Vec3f normal) {
         return false;
     }
 };
