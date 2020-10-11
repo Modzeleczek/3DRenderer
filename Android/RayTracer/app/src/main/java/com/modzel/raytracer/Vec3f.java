@@ -119,15 +119,11 @@ public class Vec3f {
         Z = newValue.Z;
     }
 
-    public Vec3b AsVec3b() {
-        Vec3b result = new Vec3b((byte)0, (byte)0, (byte)0);
-        if (X > 1.f) result.R = (byte)255;
-        else result.R = (byte)(255 * X);
-        if (Y > 1.f) result.G = (byte)255;
-        else result.G = (byte)(255 * Y);
-        if (Z > 1.f) result.B = (byte)255;
-        else result.B = (byte)(255 * Z);
-        return result;
+    public Vec3f Truncate() {
+        if (X > 1.f) X = 1.f;
+        if (Y > 1.f) Y = 1.f;
+        if (Z > 1.f) Z = 1.f;
+        return this;
     }
 
     public static float Dot(Vec3f v1, Vec3f v2) {
