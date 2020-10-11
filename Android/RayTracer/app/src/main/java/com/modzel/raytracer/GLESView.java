@@ -36,31 +36,7 @@ public class GLESView extends GLSurfaceView {
             case MotionEvent.ACTION_MOVE:
                 TouchX = (int)event.getRawX();
                 TouchY = (int)event.getRawY();
-
-                if(TouchY >= ScreenHeight - ScreenHeight / 4 && TouchY < ScreenHeight) { // buttons area
-                    if(TouchY >= ScreenHeight - ScreenHeight / 8) { // lower buttons row
-                        if(TouchX < ScreenWidth / 3) { // left lower button
-                            OpenGLRenderer.SceneRenderer.Eye.Position.X -= Velocity;
-                        }
-                        else if (TouchX < 2 * (ScreenWidth / 3)) { // middle lower button
-                            OpenGLRenderer.SceneRenderer.Eye.Position.Y -= Velocity;
-                        }
-                        else { // right lower button
-                            OpenGLRenderer.SceneRenderer.Eye.Position.X += Velocity;
-                        }
-                    }
-                    else { // upper buttons row
-                        if(TouchX < ScreenWidth / 3) { // left upper button
-                            OpenGLRenderer.SceneRenderer.Eye.Position.Z -= Velocity;
-                        }
-                        else if (TouchX < 2 * (ScreenWidth / 3)) { // middle upper button
-                            OpenGLRenderer.SceneRenderer.Eye.Position.Y += Velocity;
-                        }
-                        else { // right upper button
-                            OpenGLRenderer.SceneRenderer.Eye.Position.Z += Velocity;
-                        }
-                    }
-                }
+                MoveCamera();
                 OpenGLRenderer.SceneRenderer.RenderFrame();
                 // After GLSurfaceView.requestRender is called, GLSurfaceView.Renderer.onDrawFrame is called.
                 this.requestRender();
@@ -69,6 +45,35 @@ public class GLESView extends GLSurfaceView {
                 break;
         }
         return true;
+    }
+
+    private boolean MoveCamera() {
+        if(TouchY >= ScreenHeight - ScreenHeight / 4 && TouchY < ScreenHeight) { // buttons area
+            if(TouchY >= ScreenHeight - ScreenHeight / 8) { // lower buttons row
+                if(TouchX < ScreenWidth / 3) { // left lower button
+                    OpenGLRenderer.SceneRenderer.Eye.Position.X -= Velocity;
+                }
+                else if (TouchX < 2 * (ScreenWidth / 3)) { // middle lower button
+                    OpenGLRenderer.SceneRenderer.Eye.Position.Y -= Velocity;
+                }
+                else { // right lower button
+                    OpenGLRenderer.SceneRenderer.Eye.Position.X += Velocity;
+                }
+            }
+            else { // upper buttons row
+                if(TouchX < ScreenWidth / 3) { // left upper button
+                    OpenGLRenderer.SceneRenderer.Eye.Position.Z -= Velocity;
+                }
+                else if (TouchX < 2 * (ScreenWidth / 3)) { // middle upper button
+                    OpenGLRenderer.SceneRenderer.Eye.Position.Y += Velocity;
+                }
+                else { // right upper button
+                    OpenGLRenderer.SceneRenderer.Eye.Position.Z += Velocity;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
