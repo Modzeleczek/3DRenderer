@@ -10,6 +10,9 @@ public class Vec3f {
     public Vec3f(Vec3f o) {
         X = o.X; Y = o.Y; Z = o.Z;
     }
+    public Vec3f() {
+        X = 0; Y = 0; Z = 0;
+    }
 
     public Vec3f Add(Vec3f v) {
         X += v.X;
