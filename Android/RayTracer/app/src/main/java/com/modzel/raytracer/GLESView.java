@@ -30,11 +30,11 @@ public class GLESView extends GLSurfaceView {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
             //case MotionEvent.ACTION_MOVE:
-                // TouchX = (event.getX() - 540.f) / 540.f; // 1080 / 2; normalized X, in range <-1,1>
-                // TouchY = (event.getY() - 1014.f) / 1014.f; // 2029 / 2; normalized Y, in range <-1,1>
-                // TouchX = (int)event.getRawX();
-                // TouchY = (int)event.getRawY();
-                // RendererInstance.PaintCell();
+                /* TouchX = (event.getX() - 540.f) / 540.f; // 1080 / 2; normalized X, in range <-1,1>
+                TouchY = (event.getY() - 1014.f) / 1014.f; // 2029 / 2; normalized Y, in range <-1,1> */
+                /* TouchX = (int)event.getRawX();
+                TouchY = (int)event.getRawY();
+                OpenGLRenderer.PaintCell(); */
                 OpenGLRenderer.SceneRenderer.Eye.RotateX((float)Math.PI / 16.f);
                 OpenGLRenderer.SceneRenderer.RenderFrame();
                 // After GLSurfaceView.requestRender is called, GLSurfaceView.Renderer.onDrawFrame is called.
