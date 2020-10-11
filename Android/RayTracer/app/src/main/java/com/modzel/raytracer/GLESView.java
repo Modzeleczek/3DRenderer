@@ -56,10 +56,13 @@ public class GLESView extends GLSurfaceView {
         // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
         // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
         int shader = GLES20.glCreateShader(type);
+        GLESView.CheckGlError("glCreateShader");
 
         // add the source code to the shader and compile it
         GLES20.glShaderSource(shader, shaderCode);
+        GLESView.CheckGlError("glShaderSource");
         GLES20.glCompileShader(shader);
+        GLESView.CheckGlError("glCompileShader");
 
         return shader;
     }
