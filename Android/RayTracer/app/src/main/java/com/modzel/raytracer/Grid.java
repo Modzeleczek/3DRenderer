@@ -10,11 +10,11 @@ import java.nio.ShortBuffer;
 public class Grid {
     private final String VertexShaderCode =
             "attribute vec4 aColor;" +
-            "varying vec4 vColor;" +
             "attribute vec4 aPosition;" +
+            "varying vec4 vColor;" +
             "void main() {" +
-            "  gl_Position = aPosition;" +
             "  vColor = aColor;" +
+            "  gl_Position = aPosition;" +
             "}";
     private final String FragmentShaderCode =
             //"precision mediump float;" +
