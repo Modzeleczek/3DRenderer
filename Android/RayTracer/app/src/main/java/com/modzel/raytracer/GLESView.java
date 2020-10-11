@@ -108,7 +108,7 @@ public class GLESView extends GLSurfaceView {
             // Set the background frame color.
             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             // Create the grid.
-            GridInstance = new Grid(16, 16);
+            GridInstance = new Grid(64, 64);
 
             SceneRenderer = new com.modzel.raytracer.Renderer(GridInstance);
 
