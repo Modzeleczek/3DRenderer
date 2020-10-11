@@ -64,7 +64,7 @@ public class Grid {
                 vertices[vertexCoordIndex++] = y;
                 vertices[vertexCoordIndex++] = 0.f;
 
-                colors[colorComponentIndex++] = 1.f; // red
+                colors[colorComponentIndex++] = 0.f; // red
                 colors[colorComponentIndex++] = 0.f; // green
                 colors[colorComponentIndex++] = 0.f; // blue
                 colors[colorComponentIndex++] = 1.f; // alpha
