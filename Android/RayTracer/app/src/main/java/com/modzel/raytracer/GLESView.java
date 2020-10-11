@@ -13,15 +13,16 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class GLESView extends GLSurfaceView {
 
-    private Renderer RendererInstance;
+    private Renderer OpenGLRenderer;
+
     private int TouchX, TouchY;
     public GLESView(Context context) {
         super(context);
 
-        setEGLContextClientVersion(2);//OpenGL ES 2.0
+        setEGLContextClientVersion(2); // OpenGL ES 2.0
         // setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-        RendererInstance = new Renderer();
-        setRenderer(RendererInstance);
+        OpenGLRenderer = new Renderer();
+        setRenderer(OpenGLRenderer);
     }
 
     @Override
@@ -33,7 +34,7 @@ public class GLESView extends GLSurfaceView {
                 // TouchY = (event.getY() - 1014.f) / 1014.f; // 2029 / 2; normalized Y, in range <-1,1>
                 TouchX = (int)event.getRawX();
                 TouchY = (int)event.getRawY();
-                RendererInstance.PaintCell();
+                OpenGLRenderer.PaintCell();
                 break;
             case MotionEvent.ACTION_UP:
                 break;
@@ -90,6 +91,7 @@ public class GLESView extends GLSurfaceView {
     public class Renderer implements GLSurfaceView.Renderer {
 
         public Grid GridInstance;
+        public com.modzel.raytracer.Renderer SceneRenderer;
         private int ScreenWidth, ScreenHeight;
 
         // Method invoked, when the program starts.
@@ -103,6 +105,7 @@ public class GLESView extends GLSurfaceView {
             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             // Create the grid.
             GridInstance = new Grid(16, 16);
+            SceneRenderer = new com.modzel.raytracer.Renderer(GridInstance);
         }
 
         @Override
