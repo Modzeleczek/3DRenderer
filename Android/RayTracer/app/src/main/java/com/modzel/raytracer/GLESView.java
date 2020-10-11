@@ -150,7 +150,7 @@ public class GLESView extends GLSurfaceView {
         @Override
         public void onDrawFrame(GL10 unused) {
             // Draw background color
-            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+            // GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
             // Draw the grid.
             GridInstance.Draw();
         }
