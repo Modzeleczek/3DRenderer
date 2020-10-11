@@ -158,4 +158,8 @@ public class Vec3f {
     public String toString() {
         return '(' + Float.toString(X) + ',' + Float.toString(Y) + ',' + Float.toString(Z) + ')';
     }
+
+    public void CopyFrom(Vec3f o) {
+        X = o.X; Y = o.Y; Z = o.Z;
+    }
 }
