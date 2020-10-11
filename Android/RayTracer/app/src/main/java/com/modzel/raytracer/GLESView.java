@@ -17,7 +17,9 @@ public class GLESView extends GLSurfaceView {
 
     private int ScreenWidth, ScreenHeight;
     private int TouchX, TouchY;
+    private int PreviousX, PreviousY;
     private float Velocity;
+    private float CameraSensitivity;
 
     public GLESView(Context context) {
         super(context);
@@ -27,16 +29,34 @@ public class GLESView extends GLSurfaceView {
         setRenderer(OpenGLRenderer);
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         Velocity = 1.f / 2.f;
+        CameraSensitivity = (float)((2.f * Math.PI) / 512.f);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                TouchX = (int)event.getRawX();
+                TouchY = (int)event.getRawY();
+                PreviousX = TouchX;
+                PreviousY = TouchY;
+                MoveCamera();
+                
+                OpenGLRenderer.SceneRenderer.RenderFrame();
+                // After GLSurfaceView.requestRender is called, GLSurfaceView.Renderer.onDrawFrame is called.
+                this.requestRender();
+                break;
             case MotionEvent.ACTION_MOVE:
                 TouchX = (int)event.getRawX();
                 TouchY = (int)event.getRawY();
-                MoveCamera();
+                if(!MoveCamera()) { // above buttons area
+                    int xDifference = TouchX - PreviousX, yDifference = TouchY - PreviousY;
+                    OpenGLRenderer.SceneRenderer.Eye.RotateY(-CameraSensitivity * xDifference);
+                    OpenGLRenderer.SceneRenderer.Eye.RotateX(-CameraSensitivity * yDifference);
+                }
+                PreviousX = TouchX;
+                PreviousY = TouchY;
+
                 OpenGLRenderer.SceneRenderer.RenderFrame();
                 // After GLSurfaceView.requestRender is called, GLSurfaceView.Renderer.onDrawFrame is called.
                 this.requestRender();
