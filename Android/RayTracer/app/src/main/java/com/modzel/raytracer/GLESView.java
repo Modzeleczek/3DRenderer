@@ -35,7 +35,7 @@ public class GLESView extends GLSurfaceView {
                 /* TouchX = (int)event.getRawX();
                 TouchY = (int)event.getRawY();
                 OpenGLRenderer.PaintCell(); */
-                OpenGLRenderer.SceneRenderer.Eye.RotateX((float)Math.PI / 16.f);
+                OpenGLRenderer.SceneRenderer.Eye.RotateY((float)Math.PI / 16.f);
                 OpenGLRenderer.SceneRenderer.RenderFrame();
                 // After GLSurfaceView.requestRender is called, GLSurfaceView.Renderer.onDrawFrame is called.
                 this.requestRender();
