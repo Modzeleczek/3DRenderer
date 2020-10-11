@@ -50,9 +50,9 @@ public class GLESView extends GLSurfaceView {
                 TouchX = (int)event.getRawX();
                 TouchY = (int)event.getRawY();
                 if(!MoveCamera()) { // above buttons area
-                    int xDifference = TouchX - PreviousX, yDifference = TouchY - PreviousY;
-                    OpenGLRenderer.SceneRenderer.Eye.RotateY(-CameraSensitivity * xDifference);
-                    OpenGLRenderer.SceneRenderer.Eye.RotateX(-CameraSensitivity * yDifference);
+                    int xDifference = PreviousX - TouchX, yDifference = PreviousY - TouchY;
+                    OpenGLRenderer.SceneRenderer.Eye.RotateY(CameraSensitivity * xDifference);
+                    OpenGLRenderer.SceneRenderer.Eye.RotateX(CameraSensitivity * yDifference);
                 }
                 PreviousX = TouchX;
                 PreviousY = TouchY;
