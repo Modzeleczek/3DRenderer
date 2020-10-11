@@ -117,7 +117,8 @@ public class Rectangle extends PlainShape {
         }
         else
         {
-            final float x = Direction.X, y = Direction.Y, z = Direction.Z, commonCoefficient = (1.f + z) / (x*x + y*y);
+            final float x = Direction.X, y = Direction.Y, z = Direction.Z,
+                    commonCoefficient = (1.f + z) / (x*x + y*y);
 
             // HorizontalAxis = (y^2 * (1 + z) / (x^2 + y^2) - z, -x*y * (1 + z) / (x^2 + y^2), x)
             // VerticalAxis = (-x*y * (1 + z) / (x^2 + y^2), x^2 * (1 + z) / (x^2 + y^2) - z, y)*/
