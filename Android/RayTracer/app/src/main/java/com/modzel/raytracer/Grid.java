@@ -138,50 +138,50 @@ public class Grid {
     public void Draw() {
         // Add program to OpenGL environment.
         GLES20.glUseProgram(ProgramHandle);
-        GLESView.CheckGlError("glUseProgram");
+        // GLESView.CheckGlError("glUseProgram");
 
         // Get handle to vertex shader's aPosition member.
         PositionHandle = GLES20.glGetAttribLocation(ProgramHandle, "aPosition");
-        GLESView.CheckGlError("glGetAttribLocation");
+        // GLESView.CheckGlError("glGetAttribLocation");
 
         // Enable edition of 'aPosition' attribute in the vertex shader.
         GLES20.glEnableVertexAttribArray(PositionHandle);
-        GLESView.CheckGlError("glEnableVertexAttribArray");
+        // GLESView.CheckGlError("glEnableVertexAttribArray");
 
         // Put the grid cells' vertex coordinate data in GPU memory.
         GLES20.glVertexAttribPointer(
                 PositionHandle, COORDS_PER_VERTEX,
                 GLES20.GL_FLOAT, false, // GLES20.GL_FALSE
                 VertexStride, VerticesBuffer);
-        GLESView.CheckGlError("glVertexAttribPointer");
+        // GLESView.CheckGlError("glVertexAttribPointer");
 
         // Get handle to fragment shader's aColor member.
         ColorHandle = GLES20.glGetAttribLocation(ProgramHandle, "aColor");
-        GLESView.CheckGlError("glGetAttribLocation");
+        // GLESView.CheckGlError("glGetAttribLocation");
 
         // Enable edition of 'aColor' attribute in the fragment shader.
         GLES20.glEnableVertexAttribArray(ColorHandle);
-        GLESView.CheckGlError("glEnableVertexAttribArray");
+        // GLESView.CheckGlError("glEnableVertexAttribArray");
 
         // Put the grid cells' vertex color data in GPU memory.
         GLES20.glVertexAttribPointer(
                 ColorHandle, COLOR_COMPONENTS_PER_VERTEX,
                 GLES20.GL_FLOAT, false,
                 ColorStride, ColorsBuffer);
-        GLESView.CheckGlError("glVertexAttribPointer");
+        // GLESView.CheckGlError("glVertexAttribPointer");
 
         // Draw the grid.
         GLES20.glDrawElements(
                 GLES20.GL_TRIANGLES, IndicesBufferLength,
                 GLES20.GL_UNSIGNED_SHORT, IndicesBuffer);
-        GLESView.CheckGlError("glDrawElements");
+        // GLESView.CheckGlError("glDrawElements");
 
         // Disable edition of 'aPosition' attribute in the vertex shader.
         GLES20.glDisableVertexAttribArray(PositionHandle);
-        GLESView.CheckGlError("glDisableVertexAttribArray");
+        // GLESView.CheckGlError("glDisableVertexAttribArray");
         // Disable edition of 'aColor' attribute in the fragment shader.
         GLES20.glDisableVertexAttribArray(ColorHandle);
-        GLESView.CheckGlError("glDisableVertexAttribArray");
+        // GLESView.CheckGlError("glDisableVertexAttribArray");
     }
 
     public void SetCell(int index, float r, float g, float b, float a) {
