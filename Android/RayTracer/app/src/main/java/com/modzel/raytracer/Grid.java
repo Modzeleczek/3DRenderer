@@ -130,12 +130,7 @@ public class Grid {
 
         GLES20.glLinkProgram(ProgramHandle);                  // create OpenGL program executables
         GLESView.CheckGlError("glLinkProgram");
-    }
 
-    /**
-     * Encapsulates the OpenGL ES 2.0 instructions for drawing this grid.
-     */
-    public void Draw() {
         // Add program to OpenGL environment.
         GLES20.glUseProgram(ProgramHandle);
         // GLESView.CheckGlError("glUseProgram");
@@ -144,6 +139,15 @@ public class Grid {
         PositionHandle = GLES20.glGetAttribLocation(ProgramHandle, "aPosition");
         // GLESView.CheckGlError("glGetAttribLocation");
 
+        // Get handle to fragment shader's aColor member.
+        ColorHandle = GLES20.glGetAttribLocation(ProgramHandle, "aColor");
+        // GLESView.CheckGlError("glGetAttribLocation");
+    }
+
+    /**
+     * Encapsulates the OpenGL ES 2.0 instructions for drawing this grid.
+     */
+    public void Draw() {
         // Enable edition of 'aPosition' attribute in the vertex shader.
         GLES20.glEnableVertexAttribArray(PositionHandle);
         // GLESView.CheckGlError("glEnableVertexAttribArray");
@@ -154,10 +158,6 @@ public class Grid {
                 GLES20.GL_FLOAT, false, // GLES20.GL_FALSE
                 VertexStride, VerticesBuffer);
         // GLESView.CheckGlError("glVertexAttribPointer");
-
-        // Get handle to fragment shader's aColor member.
-        ColorHandle = GLES20.glGetAttribLocation(ProgramHandle, "aColor");
-        // GLESView.CheckGlError("glGetAttribLocation");
 
         // Enable edition of 'aColor' attribute in the fragment shader.
         GLES20.glEnableVertexAttribArray(ColorHandle);
