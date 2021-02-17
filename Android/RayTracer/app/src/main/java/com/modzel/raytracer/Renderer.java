@@ -160,11 +160,6 @@ public class Renderer
         Shapes = new ArrayList<Shape>();
         Lights = new ArrayList<Light>();
     }
-    public Renderer() {
-        Width = 512;
-        Height = 512;
-        // TotalThreads = 8;
-    }
 
     /*public void RenderFrame()
     {
