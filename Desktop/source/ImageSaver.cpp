@@ -1,4 +1,4 @@
-#include "ImageSaver.hpp"
+#include "../include/ImageSaver.hpp"
 
 void PPMSaver::Save(std::string name, unsigned int width, unsigned int height, Vec3f* pixels)
 {

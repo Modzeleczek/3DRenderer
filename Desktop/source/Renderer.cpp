@@ -1,11 +1,13 @@
 #ifndef RENDERER_CPP
 #define RENDERER_CPP
 
+#define _USE_MATH_DEFINES
 #include <cmath>
+#include <float.h>
 #include <vector>
 #include <thread>
 #include <atomic>
-#include "Vector.hpp"
+#include "../include/Vector.hpp"
 #include "Shapes.cpp"
 
 class LocalCoordinateSystem
@@ -204,7 +206,7 @@ private:
         Vec3f &closestShapeNormal, Material &material)
     {
         byte i;
-        float closestShapeDistance = MAXFLOAT, distance;
+        float closestShapeDistance = FLT_MAX, distance;
         Vec3f normal, hitPoint;
         for(i = 0; i < Shapes.size(); ++i)
         {
@@ -224,7 +226,7 @@ private:
         Vec3f &closestShapeNormal)
     {
         byte i;
-        float closestShapeDistance = MAXFLOAT, distance;
+        float closestShapeDistance = FLT_MAX, distance;
         Vec3f normal, hitPoint;
         for(i = 0; i < Shapes.size(); ++i)
         {

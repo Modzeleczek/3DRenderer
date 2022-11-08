@@ -1,7 +1,7 @@
 #ifndef SHAPES_CPP
 #define SHAPES_CPP
 
-#include "Vector.hpp"
+#include "../include/Vector.hpp"
 #include <cmath>
 
 struct Light

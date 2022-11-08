@@ -7,7 +7,7 @@
 class ImageSaver
 {
 public:
-    virtual void Save() = 0;
+    virtual void Save(std::string name, unsigned int width, unsigned int height, Vec3f *pixels) = 0;
 };
 
 class PPMSaver : public ImageSaver

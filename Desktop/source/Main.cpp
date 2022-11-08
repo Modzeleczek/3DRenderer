@@ -1,8 +1,8 @@
 #include <chrono>
-#include "Vector.hpp"
+#include "../include/Vector.hpp"
 #include "Shapes.cpp"
 #include "Renderer.cpp"
-#include "gif.h"
+#include "../include/gif.h"
 
 inline Vec3b randomColor()
 {
@@ -12,7 +12,7 @@ inline Vec3b randomColor()
 
 int main()
 {
-    Renderer renderer(256, 256);
+    Renderer renderer(512, 512, 8);
     GifWriter writer;
     const uint32_t delay = 20;
 	GifBegin(&writer, "output.gif", renderer.Width, renderer.Height, delay);
@@ -56,8 +56,8 @@ int main()
     const uint32_t totalFrames = 16;
     // const float rotationVelocity = M_PI * 1.f / (float) totalFrames;
     // const float rotationVelocity = M_PI / 180.f;
-     float targetX = -5.f / 2.f;
-     const float cameraVelocity = 1.f;
+    float targetX = -5.f / 2.f;
+    const float cameraVelocity = 1.f;
     float velocity = -0.25f;
 
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -89,11 +89,15 @@ int main()
 
     std::chrono::nanoseconds difference = end - begin;
 
-    std::cout << renderer.Width << ' ' << renderer.Height << ' ' << renderer.TotalThreads << '\n' <<
-        "seconds\t" << std::chrono::duration_cast<std::chrono::seconds>(difference).count() << '\n' <<
-        "milli\t" << std::chrono::duration_cast<std::chrono::milliseconds>(difference).count() << '\n' <<
-        "micro\t" << std::chrono::duration_cast<std::chrono::microseconds>(difference).count() << '\n' <<
-        "nano\t" << std::chrono::duration_cast<std::chrono::nanoseconds>(difference).count() << '\n';
+    std::cout << "resolution: " << renderer.Width << ' ' << renderer.Height << '\n' <<
+        "number of used threads: " << (int)renderer.TotalThreads << '\n' <<
+        "elapsed time: \n" <<
+        "seconds " << std::chrono::duration_cast<std::chrono::seconds>(difference).count() << '\n' <<
+        "milliseconds " << std::chrono::duration_cast<std::chrono::milliseconds>(difference).count() << '\n' <<
+        "microseconds " << std::chrono::duration_cast<std::chrono::microseconds>(difference).count() << '\n' <<
+        "nanoseconds " << std::chrono::duration_cast<std::chrono::nanoseconds>(difference).count() << '\n' <<
+        "press return to exit" << '\n';
+    std::getc(stdin);
 
     return 0;
 }
